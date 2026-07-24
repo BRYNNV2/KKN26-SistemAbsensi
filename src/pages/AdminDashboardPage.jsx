@@ -95,7 +95,7 @@ export default function AdminDashboardPage({ user, onLogout }) {
       <div className="admin-main-wrapper">
         {/* Render Mahasiswa KKN Management View when activeTab === 'mahasiswa' */}
         {activeTab === 'mahasiswa' ? (
-          <MahasiswaManagementView />
+          <MahasiswaManagementView user={user} onLogout={onLogout} />
         ) : (
           <>
             {/* Topbar Header */}
