@@ -2,44 +2,35 @@ import React, { useState } from 'react';
 import { ChevronDown, Info } from 'lucide-react';
 
 export default function AttendanceChart({ title = "Growth Trend", type = "growth" }) {
-  const [filter, setFilter] = useState(type === "growth" ? "12 Bulan Terakhir" : "7 Hari Terakhir");
-  const [activePoint, setActivePoint] = useState(null);
+  const [filter, setFilter] = useState(type === "growth" ? "4 Minggu (1 Bulan KKN)" : "7 Hari Terakhir");
 
-  // Sample data points
-  const growthData = [
-    { label: 'Jun', val: 820 },
-    { label: 'Jul', val: 850 },
-    { label: 'Agu', val: 880 },
-    { label: 'Sep', val: 910 },
-    { label: 'Okt', val: 950 },
-    { label: 'Nov', val: 985 },
-    { label: 'Des', val: 1020 },
-    { label: 'Jan', val: 1060 },
-    { label: 'Feb', val: 1100 },
-    { label: 'Mar', val: 1150 },
-    { label: 'Apr', val: 1200 },
-    { label: 'Mei', val: 1248 }
+  // Sample data points representing 1-Month KKN Program timeline (Weeks & Days)
+  const kknMonthlyData = [
+    { label: 'Minggu 1', val: 980 },
+    { label: 'Minggu 2', val: 1120 },
+    { label: 'Minggu 3', val: 1210 },
+    { label: 'Minggu 4', val: 1248 }
   ];
 
-  const attendanceData = [
-    { label: 'Mei 14', val: 90 },
-    { label: 'Mei 15', val: 94 },
-    { label: 'Mei 16', val: 91 },
-    { label: 'Mei 17', val: 93 },
-    { label: 'Mei 18', val: 90 },
-    { label: 'Mei 19', val: 88 },
-    { label: 'Mei 20', val: 95 }
+  const kknDailyData = [
+    { label: 'Senin', val: 92 },
+    { label: 'Selasa', val: 94 },
+    { label: 'Rabu', val: 91 },
+    { label: 'Kamis', val: 96 },
+    { label: 'Jumat', val: 93 },
+    { label: 'Sabtu', val: 89 },
+    { label: 'Minggu', val: 97 }
   ];
 
-  const data = type === 'growth' ? growthData : attendanceData;
-  const minVal = type === 'growth' ? 600 : 60;
+  const data = type === 'growth' ? kknMonthlyData : kknDailyData;
+  const minVal = type === 'growth' ? 800 : 70;
   const maxVal = type === 'growth' ? 1400 : 100;
 
-  // Viewport geometry with ample padding to prevent text overlap
-  const svgWidth = 700;
-  const svgHeight = 220;
-  const paddingLeft = 35;
-  const paddingRight = 35;
+  // Viewport geometry with generous spacing
+  const svgWidth = 600;
+  const svgHeight = 200;
+  const paddingLeft = 50;
+  const paddingRight = 50;
   const paddingTop = 35;
   const paddingBottom = 40;
 
@@ -52,7 +43,7 @@ export default function AttendanceChart({ title = "Growth Trend", type = "growth
     return { x, y, val: item.val, label: item.label };
   });
 
-  // Build SVG path
+  // Build SVG smooth cubic path
   const pathD = points.reduce((acc, point, i, arr) => {
     if (i === 0) return `M ${point.x} ${point.y}`;
     const prev = arr[i - 1];
@@ -70,7 +61,7 @@ export default function AttendanceChart({ title = "Growth Trend", type = "growth
       <div className="chart-card-header">
         <div className="chart-title-group">
           <h3 className="chart-title">{title}</h3>
-          <Info size={14} className="chart-info-icon" title="Metrik data real-time" />
+          <Info size={14} className="chart-info-icon" title="Program KKN62 berlangsung 1 bulan (4 Minggu)" />
         </div>
         <div className="chart-filter-dropdown">
           <span>{filter}</span>
@@ -82,7 +73,7 @@ export default function AttendanceChart({ title = "Growth Trend", type = "growth
         <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="admin-svg-chart">
           <defs>
             <linearGradient id={`chartGrad-${type}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#2563eb" stopOpacity="0.22" />
+              <stop offset="0%" stopColor="#2563eb" stopOpacity="0.25" />
               <stop offset="100%" stopColor="#2563eb" stopOpacity="0.0" />
             </linearGradient>
           </defs>
@@ -95,46 +86,21 @@ export default function AttendanceChart({ title = "Growth Trend", type = "growth
           {/* Area Fill */}
           <path d={areaD} fill={`url(#chartGrad-${type})`} />
 
-          {/* Smooth Curved Line */}
+          {/* Smooth Line */}
           <path d={pathD} fill="none" stroke="#2563eb" strokeWidth="3" strokeLinecap="round" />
 
           {/* Data Circles & Values */}
           {points.map((pt, idx) => (
-            <g 
-              key={idx} 
-              className="chart-point-group"
-              onMouseEnter={() => setActivePoint(idx)}
-              onMouseLeave={() => setActivePoint(null)}
-              style={{ cursor: 'pointer' }}
-            >
-              {/* Point Circle */}
-              <circle 
-                cx={pt.x} 
-                cy={pt.y} 
-                r={activePoint === idx ? 6 : 4} 
-                fill="#ffffff" 
-                stroke="#2563eb" 
-                strokeWidth={activePoint === idx ? 3 : 2} 
-                style={{ transition: 'all 0.2s ease' }}
-              />
-
-              {/* Value Text Above Point */}
-              <text 
-                x={pt.x} 
-                y={pt.y - 10} 
-                textAnchor="middle" 
-                className="chart-value-text"
-              >
+            <g key={idx} className="chart-point-group">
+              <circle cx={pt.x} cy={pt.y} r="5" fill="#ffffff" stroke="#2563eb" strokeWidth="2.5" />
+              
+              {/* Value label */}
+              <text x={pt.x} y={pt.y - 12} textAnchor="middle" className="chart-value-text">
                 {type === 'attendance' ? `${pt.val}%` : pt.val}
               </text>
 
-              {/* Bottom Label Text */}
-              <text 
-                x={pt.x} 
-                y={svgHeight - 12} 
-                textAnchor="middle" 
-                className="chart-label-text"
-              >
+              {/* Time Label (Weeks or Days) */}
+              <text x={pt.x} y={svgHeight - 12} textAnchor="middle" className="chart-label-text">
                 {pt.label}
               </text>
             </g>
