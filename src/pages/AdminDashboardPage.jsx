@@ -4,23 +4,19 @@ import {
   UserCheck, 
   Clock, 
   MapPin, 
-  TrendingUp, 
-  Calendar as CalendarIcon, 
   ChevronRight,
-  User,
-  CheckCircle2,
-  FileSpreadsheet,
-  Award
+  Calendar as CalendarIcon
 } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
 import AdminTopbar from '../components/AdminTopbar';
 import AttendanceChart from '../components/AttendanceChart';
 import MiniCalendar from '../components/MiniCalendar';
+import MahasiswaManagementView from '../components/MahasiswaManagementView';
 
 export default function AdminDashboardPage({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  // Sample Recent Activity Table Data
+  // Sample Recent Activity Table Data for Dashboard Overview
   const recentActivities = [
     {
       id: 1,
@@ -108,151 +104,152 @@ export default function AdminDashboardPage({ user, onLogout }) {
 
       {/* Main Content Area */}
       <div className="admin-main-wrapper">
-        {/* Topbar Header */}
-        <AdminTopbar user={user} onLogout={onLogout} />
+        {/* Render Mahasiswa KKN Management View when activeTab === 'mahasiswa' */}
+        {activeTab === 'mahasiswa' ? (
+          <MahasiswaManagementView />
+        ) : (
+          <>
+            {/* Topbar Header */}
+            <AdminTopbar user={user} onLogout={onLogout} />
 
-        {/* Dashboard Body Grid */}
-        <div className="admin-dashboard-body">
-          {/* KPI Metric Cards Row (4 Columns) */}
-          <div className="kpi-cards-grid">
-            {/* KPI Card 1 */}
-            <div className="kpi-card blue">
-              <div className="kpi-icon-wrapper blue">
-                <Users size={22} />
-              </div>
-              <div className="kpi-details">
-                <span className="kpi-title">Total Mahasiswa KKN</span>
-                <h3 className="kpi-value">1,248</h3>
-                <span className="kpi-trend positive">↗ 5.2% dari bulan lalu</span>
-              </div>
-            </div>
-
-            {/* KPI Card 2 */}
-            <div className="kpi-card emerald">
-              <div className="kpi-icon-wrapper emerald">
-                <UserCheck size={22} />
-              </div>
-              <div className="kpi-details">
-                <span className="kpi-title">Hadir Hari Ini</span>
-                <h3 className="kpi-value">982</h3>
-                <span className="kpi-trend positive">↗ 97.4% presensi tepat waktu</span>
-              </div>
-            </div>
-
-            {/* KPI Card 3 */}
-            <div className="kpi-card amber">
-              <div className="kpi-icon-wrapper amber">
-                <Clock size={22} />
-              </div>
-              <div className="kpi-details">
-                <span className="kpi-title">Pending Izin / Dispensasi</span>
-                <h3 className="kpi-value">28</h3>
-                <span className="kpi-trend warning">↘ 12.0% dari bulan lalu</span>
-              </div>
-            </div>
-
-            {/* KPI Card 4 */}
-            <div className="kpi-card purple">
-              <div className="kpi-icon-wrapper purple">
-                <MapPin size={22} />
-              </div>
-              <div className="kpi-details">
-                <span className="kpi-title">Desa KKN Terdaftar</span>
-                <h3 className="kpi-value">14 Desa</h3>
-                <span className="kpi-sub-text">Binaan DPL Terverifikasi</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Middle Row: Charts & Mini Calendar */}
-          <div className="charts-row-grid">
-            <AttendanceChart title="Pertumbuhan Mahasiswa" type="growth" />
-            <AttendanceChart title="Trend Presensi Harian" type="attendance" />
-            <MiniCalendar />
-          </div>
-
-          {/* Bottom Row: Recent Activity Table & Upcoming Events */}
-          <div className="bottom-row-grid">
-            {/* Recent Activity Table Card */}
-            <div className="activity-table-card">
-              <div className="card-table-header">
-                <h3 className="table-card-title">Aktivitas Presensi Terkini</h3>
-              </div>
-
-              <div className="table-wrapper">
-                <table className="admin-custom-table">
-                  <thead>
-                    <tr>
-                      <th>Mahasiswa / DPL</th>
-                      <th>Status / Action</th>
-                      <th>Detail Kegiatan</th>
-                      <th>Waktu</th>
-                      <th>Oleh</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentActivities.map((act) => (
-                      <tr key={act.id}>
-                        <td>
-                          <div className="user-profile-cell">
-                            <img src={act.avatar} alt={act.name} className="user-avatar-img" />
-                            <div className="user-meta">
-                              <span className="user-name">{act.name}</span>
-                              <span className="user-role-sub">{act.role}</span>
-                            </div>
-                          </div>
-                        </td>
-                        <td>
-                          <span className={`status-badge ${act.badgeType}`}>
-                            {act.action}
-                          </span>
-                        </td>
-                        <td className="details-cell">{act.details}</td>
-                        <td className="time-cell">{act.time}</td>
-                        <td className="by-cell">{act.by}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="table-card-footer">
-                <button type="button" className="view-all-btn">
-                  <span>Lihat Semua Aktivitas</span>
-                  <ChevronRight size={16} />
-                </button>
-              </div>
-            </div>
-
-            {/* Upcoming Events Card */}
-            <div className="upcoming-events-card">
-              <div className="events-card-header">
-                <h3 className="events-title">Agenda & Supervisi KKN</h3>
-              </div>
-
-              <div className="events-list">
-                {upcomingEvents.map((evt) => (
-                  <div key={evt.id} className="event-item-box">
-                    <div className={`event-icon-badge ${evt.color}`}>
-                      <CalendarIcon size={18} />
-                    </div>
-                    <div className="event-info">
-                      <h4 className="event-item-title">{evt.title}</h4>
-                      <span className="event-item-date">{evt.date}</span>
-                    </div>
+            {/* Dashboard Body Grid */}
+            <div className="admin-dashboard-body">
+              {/* KPI Metric Cards Row (4 Columns) */}
+              <div className="kpi-cards-grid">
+                <div className="kpi-card blue">
+                  <div className="kpi-icon-wrapper blue">
+                    <Users size={22} />
                   </div>
-                ))}
+                  <div className="kpi-details">
+                    <span className="kpi-title">Total Mahasiswa KKN</span>
+                    <h3 className="kpi-value">1,248</h3>
+                    <span className="kpi-trend positive">↗ 5.2% dari bulan lalu</span>
+                  </div>
+                </div>
+
+                <div className="kpi-card emerald">
+                  <div className="kpi-icon-wrapper emerald">
+                    <UserCheck size={22} />
+                  </div>
+                  <div className="kpi-details">
+                    <span className="kpi-title">Hadir Hari Ini</span>
+                    <h3 className="kpi-value">982</h3>
+                    <span className="kpi-trend positive">↗ 97.4% presensi tepat waktu</span>
+                  </div>
+                </div>
+
+                <div className="kpi-card amber">
+                  <div className="kpi-icon-wrapper amber">
+                    <Clock size={22} />
+                  </div>
+                  <div className="kpi-details">
+                    <span className="kpi-title">Pending Izin / Dispensasi</span>
+                    <h3 className="kpi-value">28</h3>
+                    <span className="kpi-trend warning">↘ 12.0% dari bulan lalu</span>
+                  </div>
+                </div>
+
+                <div className="kpi-card purple">
+                  <div className="kpi-icon-wrapper purple">
+                    <MapPin size={22} />
+                  </div>
+                  <div className="kpi-details">
+                    <span className="kpi-title">Desa KKN Terdaftar</span>
+                    <h3 className="kpi-value">14 Desa</h3>
+                    <span className="kpi-sub-text">Binaan DPL Terverifikasi</span>
+                  </div>
+                </div>
               </div>
 
-              <div className="events-card-footer">
-                <button type="button" className="view-all-btn">
-                  <span>Lihat Semua Agenda</span>
-                  <ChevronRight size={16} />
-                </button>
+              {/* Middle Row: Charts & Mini Calendar */}
+              <div className="charts-row-grid">
+                <AttendanceChart title="Pertumbuhan Mahasiswa" type="growth" />
+                <AttendanceChart title="Trend Presensi Harian" type="attendance" />
+                <MiniCalendar />
+              </div>
+
+              {/* Bottom Row: Recent Activity Table & Upcoming Events */}
+              <div className="bottom-row-grid">
+                <div className="activity-table-card">
+                  <div className="card-table-header">
+                    <h3 className="table-card-title">Aktivitas Presensi Terkini</h3>
+                  </div>
+
+                  <div className="table-wrapper">
+                    <table className="admin-custom-table">
+                      <thead>
+                        <tr>
+                          <th>Mahasiswa / DPL</th>
+                          <th>Status / Action</th>
+                          <th>Detail Kegiatan</th>
+                          <th>Waktu</th>
+                          <th>Oleh</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {recentActivities.map((act) => (
+                          <tr key={act.id}>
+                            <td>
+                              <div className="user-profile-cell">
+                                <img src={act.avatar} alt={act.name} className="user-avatar-img" />
+                                <div className="user-meta">
+                                  <span className="user-name">{act.name}</span>
+                                  <span className="user-role-sub">{act.role}</span>
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <span className={`status-badge ${act.badgeType}`}>
+                                {act.action}
+                              </span>
+                            </td>
+                            <td className="details-cell">{act.details}</td>
+                            <td className="time-cell">{act.time}</td>
+                            <td className="by-cell">{act.by}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="table-card-footer">
+                    <button type="button" className="view-all-btn" onClick={() => setActiveTab('mahasiswa')}>
+                      <span>Kelola Data Mahasiswa</span>
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="upcoming-events-card">
+                  <div className="events-card-header">
+                    <h3 className="events-title">Agenda & Supervisi KKN</h3>
+                  </div>
+
+                  <div className="events-list">
+                    {upcomingEvents.map((evt) => (
+                      <div key={evt.id} className="event-item-box">
+                        <div className={`event-icon-badge ${evt.color}`}>
+                          <CalendarIcon size={18} />
+                        </div>
+                        <div className="event-info">
+                          <h4 className="event-item-title">{evt.title}</h4>
+                          <span className="event-item-date">{evt.date}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="events-card-footer">
+                    <button type="button" className="view-all-btn">
+                      <span>Lihat Semua Agenda</span>
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          </>
+        )}
       </div>
     </div>
   );
