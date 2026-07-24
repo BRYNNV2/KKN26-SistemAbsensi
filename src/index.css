@@ -931,6 +931,16 @@ html, body {
   border-radius: var(--radius-card);
   padding: 1.25rem;
   box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.table-card-title, .events-title {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--color-text-main);
+  margin-bottom: 1rem;
 }
 
 .admin-custom-table { width: 100%; border-collapse: collapse; text-align: left; }
@@ -957,6 +967,90 @@ html, body {
 .action-icon-btn { border: none; background: transparent; width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--color-text-muted); }
 .action-icon-btn:hover { background: #f1f5f9; color: var(--color-text-main); }
 .action-icon-btn.delete:hover { background: #fef2f2; color: #ef4444; }
+
+/* Clean View All Button Link Styling */
+.table-card-footer, .events-card-footer {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-admin-border);
+  display: flex;
+  justify-content: flex-start;
+}
+
+.view-all-btn {
+  border: none;
+  background: transparent;
+  color: var(--color-primary-blue);
+  font-family: var(--font-primary);
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.view-all-btn:hover {
+  background: #eff6ff;
+  color: var(--color-primary-hover);
+}
+
+/* Agenda & Supervisi KKN Events Layout Styling */
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  flex: 1;
+}
+
+.event-item-box {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.85rem;
+  background: #f8fafc;
+  border: 1px solid var(--color-admin-border);
+  border-radius: var(--radius-card);
+  padding: 0.85rem;
+}
+
+.event-icon-badge {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.event-icon-badge.purple { background: #f3e8ff; color: #8b5cf6; }
+.event-icon-badge.emerald { background: #ecfdf5; color: #10b981; }
+.event-icon-badge.amber { background: #fffbeb; color: #f59e0b; }
+
+.event-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.event-item-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  line-height: 1.25;
+}
+
+.event-item-date {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+}
 
 /* =========================================================
    MAHASISWA MANAGEMENT STYLES (EXACT CLEAN HRIMS DESIGN)
@@ -1107,7 +1201,6 @@ html, body {
   gap: 1rem;
 }
 
-/* Fix SVG Donut Container overflow */
 .donut-chart-container {
   position: relative;
   width: 140px;
