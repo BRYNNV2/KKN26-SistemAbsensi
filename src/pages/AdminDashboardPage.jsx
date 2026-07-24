@@ -61,17 +61,6 @@ export default function AdminDashboardPage({ user, onLogout }) {
       time: 'Yesterday',
       by: 'Self',
       avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 5,
-      name: 'Ava Davis',
-      role: 'Mahasiswa Kelompok 03',
-      action: 'Review Kegiatan',
-      badgeType: 'primary',
-      details: '2026 Q2 Review Completed',
-      time: 'Yesterday',
-      by: 'Spencer',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'
     }
   ];
 
