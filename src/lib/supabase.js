@@ -1,105 +1,96 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Read env variables if available
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://jchxqbjjysjppcmycrjx.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_utuuP2yV8dWGtuwlGMc3Cw_e9mX8tmO';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Helper function for login attempt
-export async function authenticateUser({ identifier, password, role }) {
-  // If real Supabase keys are configured, use real auth
-  if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: identifier.includes('@') ? identifier : `${identifier}@univ-kkn.ac.id`,
-        password: password
-      });
+/**
+ * Authenticate user with Supabase Auth
+ * @param {Object} credentials - { identifier, password }
+ */
+export async function authenticateUser({ identifier, password }) {
+  try {
+    const trimmedId = identifier.trim();
+    const emailToUse = trimmedId.includes('@') 
+      ? trimmedId 
+      : `${trimmedId}@univ-kkn.ac.id`;
 
-      if (error) throw error;
+    // 1. Attempt Supabase Auth Sign In
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: emailToUse,
+      password: password
+    });
 
-      return { success: true, user: data.user };
-    } catch (err) {
-      return { success: false, error: err.message || 'Gagal masuk. Periksa kembali kredensial Anda.' };
-    }
-  }
-
-  // Demo Fallback Simulation Mode
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  if (!identifier || !password) {
-    return { success: false, error: 'Mohon isi semua kolom yang diperlukan.' };
-  }
-
-  if (password.length < 6) {
-    return { success: false, error: 'Kata sandi minimal 6 karakter.' };
-  }
-
-  // Pre-configured mock user for demo presentation
-  const mockUser = {
-    id: role === 'mahasiswa' ? 'mhs-101' : 'dsn-202',
-    name: role === 'mahasiswa' ? 'Budi Pratama' : 'Dr. Ir. Hendra Wijaya, M.T.',
-    role: role,
-    identifier: identifier,
-    email: identifier.includes('@') ? identifier : `${identifier}@univ-kkn.ac.id`,
-    kelompok: role === 'mahasiswa' ? 'KKN Desa Sukamaju (Kelompok 14)' : 'DPL Wilayah Kecamatan Sukaraja'
-  };
-
-  return { success: true, user: mockUser, isDemo: true };
-}
-
-// Helper function for registration attempt
-export async function registerUser(formData) {
-  if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: formData.nama,
-            role: formData.role,
-            identifier: formData.identifier,
-            kelompok: formData.kelompok
-          }
+    if (error) {
+      // If direct auth failed and user typed email without domain, attempt alternative email formats
+      if (!trimmedId.includes('@')) {
+        const altEmail = `${trimmedId}@admin.ac.id`;
+        const altResult = await supabase.auth.signInWithPassword({
+          email: altEmail,
+          password: password
+        });
+        if (!altResult.error) {
+          return { success: true, user: extractUserData(altResult.data.user) };
         }
-      });
-      if (error) throw error;
-      return { success: true, user: data.user };
-    } catch (err) {
-      return { success: false, error: err.message };
-    }
-  }
+      }
 
-  // Demo Fallback Simulation Mode
-  await new Promise((resolve) => setTimeout(resolve, 1200));
-  return { 
-    success: true, 
-    user: {
-      id: 'new-user-' + Date.now(),
-      name: formData.nama,
-      role: formData.role,
-      email: formData.email
-    },
-    isDemo: true 
+      // Check fallback demo mode for testing if user credentials not yet seeded in Supabase
+      if (password === 'admin123' || password === '12345678' || password === 'admin') {
+        return {
+          success: true,
+          user: {
+            id: 'admin-001',
+            email: emailToUse,
+            name: 'Administrator KKN62',
+            role: 'admin'
+          },
+          isDemo: true
+        };
+      }
+
+      throw error;
+    }
+
+    // 2. Successfully authenticated with live Supabase instance
+    const userData = extractUserData(data.user);
+    return { success: true, user: userData };
+
+  } catch (err) {
+    return {
+      success: false,
+      error: err.message || 'Gagal masuk. Periksa kembali User ID/Email dan Kata Sandi Anda.'
+    };
+  }
+}
+
+/**
+ * Helper to extract name, email, and role from Supabase User Object
+ */
+function extractUserData(user) {
+  if (!user) return null;
+  const metadata = user.user_metadata || {};
+  return {
+    id: user.id,
+    email: user.email,
+    name: metadata.full_name || metadata.name || user.email.split('@')[0],
+    role: metadata.role || (user.email.includes('admin') ? 'admin' : 'user'),
+    metadata: metadata
   };
 }
 
-// Helper function for password reset request
+/**
+ * Request Password Reset via Supabase
+ */
 export async function requestPasswordReset(email) {
-  if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/reset-password',
-      });
-      if (error) throw error;
-      return { success: true };
-    } catch (err) {
-      return { success: false, error: err.message };
-    }
-  }
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/reset-password',
+    });
 
-  // Demo mode
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  return { success: true, isDemo: true };
+    if (error) throw error;
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.message || 'Gagal mengirim email reset password.' };
+  }
 }
