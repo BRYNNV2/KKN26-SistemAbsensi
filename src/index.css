@@ -1,0 +1,387 @@
+/* Root Tokens & Design System */
+:root {
+  --font-primary: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-heading: 'Outfit', sans-serif;
+
+  /* UMRAH Official Navy Palette */
+  --color-bg-navy: #193e78;
+  
+  /* SSO Card Colors */
+  --color-sso-card-bg: rgba(188, 204, 228, 0.85);
+  --color-sso-card-border: rgba(255, 255, 255, 0.6);
+  
+  /* Solid Yellow Button matching UMRAH reference */
+  --color-yellow-btn: #ffc107;
+  --color-yellow-btn-hover: #e0a800;
+
+  --color-text-dark: #1e293b;
+  --color-text-gray: #475569;
+  --color-blue-link: #1d4ed8;
+
+  --radius-sso: 16px;
+  --radius-input: 6px;
+
+  --sso-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100vw;
+  height: 100vh;
+  max-height: 100vh;
+  font-family: var(--font-primary);
+  background-color: var(--color-bg-navy);
+  color: var(--color-text-dark);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden; /* STRICT 1 PAGE VIEWPORT - ZERO SCROLL */
+}
+
+/* Full Page Wrapper with Crisp Background Artwork */
+.app-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  background-image: url('/login-bg.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+  padding: 0;
+}
+
+/* Centered Main Content Area */
+.content-wrapper-centered {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem 1rem;
+}
+
+/* EXACT UMRAH SSO CARD */
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--color-sso-card-bg);
+  border: 1px solid var(--color-sso-card-border);
+  border-radius: var(--radius-sso);
+  padding: 1.5rem 2rem 2rem 2rem;
+  box-shadow: var(--sso-shadow);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  position: relative;
+  margin-top: 25px; /* Room for overlapping badge */
+}
+
+/* Overlapping Top White Badge Header */
+.sso-badge-header {
+  position: relative;
+  margin: -55px auto 1.25rem auto;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 10px 24px 12px 24px;
+  width: fit-content;
+  min-width: 210px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+.sso-logo-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1e40af, #0284c7);
+  border: 2px solid #facc15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  margin-bottom: 4px;
+  box-shadow: 0 4px 10px rgba(30, 64, 175, 0.3);
+}
+
+.sso-title {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1e3a8a;
+}
+
+/* Form Structure */
+.auth-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  width: 100%;
+}
+
+.input-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-icon {
+  position: absolute;
+  left: 0.85rem;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+/* Pure White Input Boxes */
+.form-input {
+  width: 100%;
+  padding: 0.7rem 0.9rem 0.7rem 2.5rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-input);
+  color: #0f172a;
+  font-family: var(--font-primary);
+  font-size: 0.88rem;
+  outline: none;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+  transition: all 0.2s ease;
+}
+
+.form-input::placeholder {
+  color: #94a3b8;
+}
+
+.form-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 0.7rem;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle-btn:hover {
+  color: #1e293b;
+}
+
+/* Solid Yellow Action Button */
+.btn-submit {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  background: var(--color-yellow-btn);
+  border: none;
+  border-radius: var(--radius-input);
+  color: #ffffff;
+  font-family: var(--font-primary);
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.35);
+  transition: all 0.2s ease;
+  margin-top: 0.15rem;
+}
+
+.btn-submit:hover {
+  background: var(--color-yellow-btn-hover);
+  box-shadow: 0 6px 16px rgba(255, 193, 7, 0.45);
+}
+
+.forgot-link {
+  color: var(--color-blue-link);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+/* SSO Divider */
+.sso-divider {
+  display: flex;
+  align-items: center;
+  margin: 0.85rem 0;
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.sso-divider::before,
+.sso-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+.sso-divider span {
+  padding: 0 0.65rem;
+}
+
+/* Google SSO Button */
+.btn-google {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-input);
+  color: #334155;
+  font-family: var(--font-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.btn-google:hover {
+  background: #f8fafc;
+}
+
+.card-footer {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.82rem;
+  color: #475569;
+  border-top: 1px solid rgba(148, 163, 184, 0.3);
+  padding-top: 0.85rem;
+}
+
+.switch-page-link {
+  color: var(--color-blue-link);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.switch-page-link:hover {
+  text-decoration: underline;
+}
+
+/* COMPACT BOTTOM FOOTER BAR */
+.bottom-footer {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  background: #ffffff;
+  color: #475569;
+  padding: 8px 24px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #e2e8f0;
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.footer-links a {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+  color: #1e40af;
+}
+
+/* Alert Boxes */
+.alert-box {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.7rem;
+}
+
+.alert-error {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+}
+
+.alert-success {
+  background: #d1fae5;
+  border: 1px solid #6ee7b7;
+  color: #065f46;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  border-top-color: #ffffff;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 640px) {
+  .bottom-footer {
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+    padding: 6px 12px;
+    font-size: 0.72rem;
+  }
+}
