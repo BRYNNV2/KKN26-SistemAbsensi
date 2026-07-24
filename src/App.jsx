@@ -2,9 +2,11 @@ import React, { useState, useRef } from 'react';
 import gsap from 'gsap';
 import LoginPage from './pages/LoginPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('login');
+  const [currentPage, setCurrentPage] = useState('login'); // 'login', 'forgot-password', 'dashboard'
+  const [currentUser, setCurrentUser] = useState(null);
   const cardContainerRef = useRef(null);
 
   const handleNavigate = (newPage) => {
@@ -30,13 +32,42 @@ export default function App() {
     }
   };
 
+  // Called when user completes authentication
+  const handleLoginSuccess = (userObj) => {
+    setCurrentUser(userObj);
+    handleNavigate('dashboard');
+  };
+
+  // Called when user logs out
+  const handleLogout = () => {
+    setCurrentUser(null);
+    handleNavigate('login');
+  };
+
+  // Render Admin Dashboard Page when authenticated
+  if (currentPage === 'dashboard') {
+    return (
+      <AdminDashboardPage 
+        user={currentUser} 
+        onLogout={handleLogout} 
+      />
+    );
+  }
+
   return (
     <div className="app-container">
-      {/* Main Centered Content Area */}
+      {/* Main Centered Content Area for Auth */}
       <main className="content-wrapper-centered">
         <div ref={cardContainerRef} style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-          {currentPage === 'login' && <LoginPage onNavigate={handleNavigate} />}
-          {currentPage === 'forgot-password' && <ForgotPasswordPage onNavigate={handleNavigate} />}
+          {currentPage === 'login' && (
+            <LoginPage 
+              onNavigate={handleNavigate} 
+              onLoginSuccess={handleLoginSuccess}
+            />
+          )}
+          {currentPage === 'forgot-password' && (
+            <ForgotPasswordPage onNavigate={handleNavigate} />
+          )}
         </div>
       </main>
 
