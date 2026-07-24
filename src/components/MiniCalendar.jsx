@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 
-export default function MiniCalendar() {
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 4, 20)); // May 20, 2026
+export default function MiniCalendar({ events = [25, 27, 30] }) {
+  const today = new Date();
+  const [viewDate, setViewDate] = useState(new Date()); // Dynamic current real-time date
+  const [selectedDay, setSelectedDay] = useState(today.getDate());
 
   const monthNames = [
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -12,16 +14,21 @@ export default function MiniCalendar() {
   const daysOfWeek = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
   const prevMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1));
   };
 
   const nextMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1));
   };
 
-  // Generate calendar days for current month
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
+  const resetToToday = () => {
+    setViewDate(new Date());
+    setSelectedDay(today.getDate());
+  };
+
+  // Generate calendar days for the current view date
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
 
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -36,7 +43,15 @@ export default function MiniCalendar() {
 
   // Current month days
   for (let d = 1; d <= daysInMonth; d++) {
-    days.push({ day: d, currentMonth: true, isToday: d === 20 && month === 4 && year === 2026 });
+    const isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+    const hasEvent = events.includes(d);
+    days.push({ 
+      day: d, 
+      currentMonth: true, 
+      isToday, 
+      hasEvent,
+      isSelected: d === selectedDay && month === viewDate.getMonth() 
+    });
   }
 
   // Next month leading days
@@ -48,32 +63,65 @@ export default function MiniCalendar() {
 
   return (
     <div className="mini-calendar-card">
+      {/* Calendar Header with Realtime Month & Year */}
       <div className="calendar-header">
-        <button type="button" className="calendar-nav-btn" onClick={prevMonth}>
+        <button type="button" className="calendar-nav-btn" onClick={prevMonth} title="Bulan Sebelumnya">
           <ChevronLeft size={16} />
         </button>
-        <span className="calendar-month-title">
-          {monthNames[month]} {year}
-        </span>
-        <button type="button" className="calendar-nav-btn" onClick={nextMonth}>
+        
+        <div className="calendar-title-group" onClick={resetToToday} style={{ cursor: 'pointer' }} title="Klik untuk Kembali ke Hari Ini">
+          <span className="calendar-month-title">
+            {monthNames[month]} {year}
+          </span>
+        </div>
+
+        <button type="button" className="calendar-nav-btn" onClick={nextMonth} title="Bulan Berikutnya">
           <ChevronRight size={16} />
         </button>
       </div>
 
+      {/* Calendar Days Grid */}
       <div className="calendar-grid">
         {daysOfWeek.map((day, idx) => (
           <div key={idx} className="calendar-day-header">
             {day}
           </div>
         ))}
-        {days.map((item, idx) => (
-          <div
-            key={idx}
-            className={`calendar-day-cell ${!item.currentMonth ? 'other-month' : ''} ${item.isToday ? 'today' : ''}`}
-          >
-            {item.day}
-          </div>
-        ))}
+
+        {days.map((item, idx) => {
+          const cellClasses = [
+            'calendar-day-cell',
+            !item.currentMonth ? 'other-month' : '',
+            item.isToday ? 'today' : '',
+            item.isSelected && !item.isToday ? 'selected' : '',
+            item.hasEvent ? 'has-event' : ''
+          ].filter(Boolean).join(' ');
+
+          return (
+            <div
+              key={idx}
+              className={cellClasses}
+              onClick={() => {
+                if (item.currentMonth) {
+                  setSelectedDay(item.day);
+                }
+              }}
+              title={item.hasEvent ? `Ada Agenda Supervisi pada tanggal ${item.day} ${monthNames[month]}` : ''}
+            >
+              <span className="day-number">{item.day}</span>
+              {/* Event Marker Indicator Dot */}
+              {item.hasEvent && item.currentMonth && (
+                <span className="calendar-event-dot" />
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Realtime Footer Badge */}
+      <div className="calendar-footer-badge">
+        <CalendarIcon size={13} />
+        <span>Hari Ini: {today.getDate()} {monthNames[today.getMonth()]} {today.getFullYear()}</span>
       </div>
     </div>
   );

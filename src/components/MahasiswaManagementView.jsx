@@ -15,7 +15,7 @@ import {
 import AdminTopbar from './AdminTopbar';
 import AddMahasiswaModal from './AddMahasiswaModal';
 
-export default function MahasiswaManagementView({ user, onLogout }) {
+export default function MahasiswaManagementView({ user, onLogout, theme, onToggleTheme }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTabFilter, setActiveTabFilter] = useState('all');

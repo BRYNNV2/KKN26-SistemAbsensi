@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Search, Bell, MessageSquare, ChevronDown, User, LogOut } from 'lucide-react';
+import { Search, Bell, MessageSquare, ChevronDown, User, LogOut, Sun, Moon } from 'lucide-react';
 
-export default function AdminTopbar({ user, onLogout }) {
+export default function AdminTopbar({ user, onLogout, theme = 'light', onToggleTheme }) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   return (
@@ -25,6 +25,16 @@ export default function AdminTopbar({ user, onLogout }) {
 
       {/* Right Controls */}
       <div className="topbar-right-controls">
+        {/* Dark Mode / Light Mode Sun & Moon Toggle Button */}
+        <button 
+          type="button" 
+          className="topbar-icon-btn theme-toggle" 
+          onClick={onToggleTheme} 
+          title={theme === 'dark' ? "Ganti ke Mode Terang (Light Mode)" : "Ganti ke Mode Gelap (Dark Mode)"}
+        >
+          {theme === 'dark' ? <Sun size={19} className="sun-icon" /> : <Moon size={19} className="moon-icon" />}
+        </button>
+
         {/* Bell Notification */}
         <button type="button" className="topbar-icon-btn" title="Notifikasi">
           <Bell size={19} />

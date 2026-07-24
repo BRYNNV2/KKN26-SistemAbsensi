@@ -10,10 +10,19 @@ import {
   Settings, 
   ShieldCheck, 
   LogOut,
-  Award
+  Award,
+  ChevronLeft,
+  ChevronRight,
+  Menu
 } from 'lucide-react';
 
-export default function AdminSidebar({ activeTab, onSelectTab, onLogout }) {
+export default function AdminSidebar({ 
+  activeTab, 
+  onSelectTab, 
+  onLogout,
+  isCollapsed = false,
+  onToggleCollapse
+}) {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'mahasiswa', label: 'Mahasiswa KKN', icon: GraduationCap },
@@ -26,16 +35,30 @@ export default function AdminSidebar({ activeTab, onSelectTab, onLogout }) {
   ];
 
   return (
-    <aside className="admin-sidebar">
-      {/* Brand Header */}
+    <aside className={`admin-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+      {/* Brand Header with Toggle Collapse Button */}
       <div className="sidebar-brand">
-        <div className="sidebar-logo-icon">
-          <Award size={22} />
+        <div className="brand-logo-group">
+          <div className="sidebar-logo-icon">
+            <Award size={22} />
+          </div>
+          {!isCollapsed && (
+            <div className="sidebar-brand-text">
+              <h2 className="brand-name">KKN62 HRIMS</h2>
+              <span className="brand-sub">Sistem Absensi Terpadu</span>
+            </div>
+          )}
         </div>
-        <div className="sidebar-brand-text">
-          <h2 className="brand-name">KKN62 HRIMS</h2>
-          <span className="brand-sub">Sistem Absensi Terpadu</span>
-        </div>
+
+        {/* Toggle Collapse Action */}
+        <button 
+          type="button" 
+          className="sidebar-toggle-btn"
+          onClick={onToggleCollapse}
+          title={isCollapsed ? "Buka Sidebar (Expand)" : "Tutup Sidebar (Collapse)"}
+        >
+          {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+        </button>
       </div>
 
       {/* Nav Menu Items */}
@@ -49,9 +72,10 @@ export default function AdminSidebar({ activeTab, onSelectTab, onLogout }) {
               type="button"
               className={`sidebar-nav-btn ${isActive ? 'active' : ''}`}
               onClick={() => onSelectTab(item.id)}
+              title={isCollapsed ? item.label : ''}
             >
               <Icon size={19} className="nav-icon" />
-              <span>{item.label}</span>
+              {!isCollapsed && <span className="nav-label">{item.label}</span>}
             </button>
           );
         })}
@@ -59,19 +83,26 @@ export default function AdminSidebar({ activeTab, onSelectTab, onLogout }) {
 
       {/* Bottom Security Card */}
       <div className="sidebar-footer-card">
-        <div className="security-icon-wrapper">
+        <div className="security-icon-wrapper" title="Terenkripsi SSL & Supabase">
           <ShieldCheck size={20} />
         </div>
-        <div className="security-text">
-          <span className="security-title">Data Anda Aman</span>
-          <span className="security-desc">Terenkripsi SSL & Supabase DB</span>
-        </div>
+        {!isCollapsed && (
+          <div className="security-text">
+            <span className="security-title">Data Anda Aman</span>
+            <span className="security-desc">Terenkripsi SSL & Supabase</span>
+          </div>
+        )}
       </div>
 
       {/* Logout Action */}
-      <button type="button" className="sidebar-logout-btn" onClick={onLogout}>
+      <button 
+        type="button" 
+        className="sidebar-logout-btn" 
+        onClick={onLogout}
+        title={isCollapsed ? "Keluar Sistem" : ""}
+      >
         <LogOut size={18} />
-        <span>Keluar Sistem</span>
+        {!isCollapsed && <span>Keluar Sistem</span>}
       </button>
     </aside>
   );

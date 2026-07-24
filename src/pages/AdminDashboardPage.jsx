@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   UserCheck, 
@@ -15,8 +15,16 @@ import MahasiswaManagementView from '../components/MahasiswaManagementView';
 
 export default function AdminDashboardPage({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [theme, setTheme] = useState(() => localStorage.getItem('kkn_theme') || 'light');
 
-  // Sample Recent Activity Table Data for Dashboard Overview
+  const handleToggleTheme = () => {
+    const nextTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(nextTheme);
+    localStorage.setItem('kkn_theme', nextTheme);
+  };
+
+  // Sample Recent Activity Table Data
   const recentActivities = [
     {
       id: 1,
@@ -87,19 +95,35 @@ export default function AdminDashboardPage({ user, onLogout }) {
   ];
 
   return (
-    <div className="admin-dashboard-layout">
+    <div className={`admin-dashboard-layout ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`} data-theme={theme}>
       {/* Sidebar Navigation */}
-      <AdminSidebar activeTab={activeTab} onSelectTab={setActiveTab} onLogout={onLogout} />
+      <AdminSidebar 
+        activeTab={activeTab} 
+        onSelectTab={setActiveTab} 
+        onLogout={onLogout}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      />
 
       {/* Main Content Area */}
       <div className="admin-main-wrapper">
         {/* Render Mahasiswa KKN Management View when activeTab === 'mahasiswa' */}
         {activeTab === 'mahasiswa' ? (
-          <MahasiswaManagementView user={user} onLogout={onLogout} />
+          <MahasiswaManagementView 
+            user={user} 
+            onLogout={onLogout} 
+            theme={theme}
+            onToggleTheme={handleToggleTheme}
+          />
         ) : (
           <>
             {/* Topbar Header */}
-            <AdminTopbar user={user} onLogout={onLogout} />
+            <AdminTopbar 
+              user={user} 
+              onLogout={onLogout} 
+              theme={theme}
+              onToggleTheme={handleToggleTheme}
+            />
 
             {/* Dashboard Body Grid */}
             <div className="admin-dashboard-body">
@@ -145,7 +169,7 @@ export default function AdminDashboardPage({ user, onLogout }) {
                   <div className="kpi-details">
                     <span className="kpi-title">Desa KKN Terdaftar</span>
                     <h3 className="kpi-value">14 Desa</h3>
-                    <span className="kpi-sub-text">Binaan DPL Terverifikasi</span>
+                    <span className="kpi-trend positive">↗ 100% binaan DPL terverifikasi</span>
                   </div>
                 </div>
               </div>
