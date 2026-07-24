@@ -808,7 +808,7 @@ html, body {
 .type-badge.purple { background: #f3e8ff; color: #7c3aed; }
 .type-badge.info { background: #eff6ff; color: #2563eb; }
 
-.action-buttons-cell { display: flex; items: center; justify-content: center; gap: 0.4rem; }
+.action-buttons-cell { display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
 .action-icon-btn { border: none; background: transparent; width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--color-text-muted); }
 .action-icon-btn:hover { background: #f1f5f9; color: var(--color-text-main); }
 .action-icon-btn.delete:hover { background: #fef2f2; color: #ef4444; }
