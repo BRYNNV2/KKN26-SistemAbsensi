@@ -591,11 +591,6 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                   </div>
                 </div>
               </div>
-
-              {/* Weekly Trend Line Chart */}
-              <div style={{ marginTop: '1.5rem' }}>
-                <AttendanceChart title="Trend Presensi Mingguan KKN" type="attendance" />
-              </div>
             </div>
           )}
 
