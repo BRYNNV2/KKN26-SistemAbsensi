@@ -36,54 +36,50 @@ export default function MahasiswaManagementView({ user, onLogout, theme, onToggl
       const { data, error } = await supabase
         .from('mahasiswa')
         .select('*')
-        .order('joining_date', { ascending: false });
+        .order('id', { ascending: false });
 
       if (error) {
         console.warn('Failed to load from Supabase:', error.message);
         if (error.message.includes('relation "public.mahasiswa" does not exist') || error.code === '42P01') {
           setShowSqlAlert(true);
         }
-        // Fallback to local storage or dummy data so page is not empty
+        // Fallback to local storage
         const cached = localStorage.getItem('kkn_mahasiswa_cached');
         if (cached) {
           setMahasiswaList(JSON.parse(cached));
-        } else {
-          // Initial fallback data
-          const fallbacks = [
-            { id: '1', name: 'Emma Johnson', nim: '21081010045', department: 'Kelompok 14 - Sukamaju', role: 'Ketua Kelompok KKN', status: 'Active', workType: 'Geofence GPS', joiningDate: 'May 24, 2026', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100' },
-            { id: '2', name: 'Liam Smith', nim: '21081010088', department: 'Kelompok 08 - Sukaraja', role: 'Sekretaris KKN', status: 'Active', workType: 'Manual DPL', joiningDate: 'Jun 12, 2026', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100' },
-            { id: '3', name: 'Olivia Brown', nim: '21081010102', department: 'Kelompok 14 - Sukamaju', role: 'Anggota KKN', status: 'On Leave', workType: 'Geofence GPS', joiningDate: 'Aug 01, 2026', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100' }
-          ];
-          setMahasiswaList(fallbacks);
-          localStorage.setItem('kkn_mahasiswa_cached', JSON.stringify(fallbacks));
         }
       } else if (data) {
-        // Map database fields to components fields
+        // Map database fields to component fields
         const mapped = data.map(m => ({
           id: m.id,
           name: m.name,
           nim: m.nim,
-          department: m.department,
+          department: m.department || m.kelompok || '-',
           role: m.role || 'Mahasiswa KKN',
           status: m.status || 'Active',
           workType: m.work_type || 'Geofence GPS',
-          joiningDate: new Date(m.joining_date).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
-          avatar: m.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100'
+          joiningDate: m.joining_date 
+            ? new Date(m.joining_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) 
+            : new Date(m.created_at || Date.now()).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }),
+          avatar: m.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.name || 'M')}&background=e2e8f0&color=0f172a&bold=true`
         }));
         setMahasiswaList(mapped);
         localStorage.setItem('kkn_mahasiswa_cached', JSON.stringify(mapped));
       }
     } catch (err) {
       console.error(err);
+      const cached = localStorage.getItem('kkn_mahasiswa_cached');
+      if (cached) {
+        setMahasiswaList(JSON.parse(cached));
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleAddSuccess = (newMahasiswa) => {
-    const updated = [newMahasiswa, ...mahasiswaList];
-    setMahasiswaList(updated);
-    localStorage.setItem('kkn_mahasiswa_cached', JSON.stringify(updated));
+  const handleAddSuccess = () => {
+    // Re-fetch from database to ensure we have the latest data
+    fetchMahasiswa();
   };
 
   const handleDelete = async (id) => {

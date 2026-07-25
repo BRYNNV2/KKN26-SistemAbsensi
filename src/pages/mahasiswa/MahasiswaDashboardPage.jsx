@@ -373,14 +373,6 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                         </span>
                       </div>
                     )}
-
-                    {/* Single Presence Time Status Details */}
-                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem', textAlign: 'center', marginBottom: '1.5rem' }}>
-                      <span style={{ fontSize: '0.78rem', color: '#64748b', display: 'block', fontWeight: 600 }}>Waktu Catatan Presensi</span>
-                      <span style={{ fontSize: '1.6rem', fontWeight: 800, color: isCheckedIn ? '#16a34a' : '#94a3b8', marginTop: '0.2rem', display: 'block' }}>
-                        {isCheckedIn ? checkInTime : '--:--'}
-                      </span>
-                    </div>
                   </div>
 
                   {/* Presence Action Buttons */}
