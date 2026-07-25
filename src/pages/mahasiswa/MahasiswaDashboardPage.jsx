@@ -76,8 +76,42 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
   const currentDayIndonesian = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][new Date().getDay()];
   const todayActiveSchedule = schedules.find(s => s.day === currentDayIndonesian);
   
-  // Enforce Dosen active session requirement instead of just schedule input
-  const isScheduleInputtedByDosen = Boolean(activeSession);
+  // Verify if active session is valid (matches today's day and time limit)
+  const isSessionValid = () => {
+    if (!activeSession) return false;
+    
+    let sDay = activeSession.day;
+    let sBatas = activeSession.time_end;
+    
+    // Extract from serialized title fallback if needed
+    if (!sDay || !sBatas) {
+      const matchDay = activeSession.title.match(/Hari:\s*([^\s|]+)/);
+      const matchBatas = activeSession.title.match(/Batas:\s*([^\s|]+)/);
+      sDay = matchDay ? matchDay[1] : null;
+      sBatas = matchBatas ? matchBatas[1] : null;
+    }
+    
+    // 1. Day verification
+    if (sDay && sDay !== currentDayIndonesian) {
+      return false;
+    }
+    
+    // 2. Time limit verification
+    if (sBatas) {
+      const now = new Date();
+      const currentHours = String(now.getHours()).padStart(2, '0');
+      const currentMinutes = String(now.getMinutes()).padStart(2, '0');
+      const currentTimeStr = `${currentHours}:${currentMinutes}`;
+      if (currentTimeStr > sBatas) {
+        return false;
+      }
+    }
+    
+    return true;
+  };
+
+  // Enforce active session requirements
+  const isScheduleInputtedByDosen = isSessionValid();
 
   // Stats
   const totalHadir = myAttendanceLogs.filter(a => a.status === 'Hadir').length || 0;
@@ -462,11 +496,11 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                       </div>
                     ) : (
                       <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '1rem', textAlign: 'center', marginBottom: '1.5rem' }}>
-                        <span style={{ fontSize: '0.78rem', color: '#166534', fontWeight: 700, display: 'block' }}>
+                        <span style={{ fontSize: '0.82rem', color: '#166534', fontWeight: 800, display: 'block' }}>
                           📢 SESI PRESENSI AKTIF: {activeSession?.title}
                         </span>
-                        <span style={{ fontSize: '0.7rem', color: '#15803d', display: 'block', marginTop: '0.2rem' }}>
-                          Dibuka sejak jam {new Date(activeSession?.opened_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                        <span style={{ fontSize: '0.74rem', color: '#15803d', display: 'block', marginTop: '0.3rem', fontWeight: 600 }}>
+                          Hari: {activeSession?.day || 'Hari Ini'} • Batas Jam Absen: s/d {activeSession?.time_end || 'Selesai'}
                         </span>
                       </div>
                     )}

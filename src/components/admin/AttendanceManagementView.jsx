@@ -42,19 +42,12 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
   const [selectedScheduleDetails, setSelectedScheduleDetails] = useState(null);
   const [detailsTab, setDetailsTab] = useState('jurnal'); // 'RPS', 'jurnal', 'nilai', 'info'
 
-  // Manual Attendance entry form states
-  const [students, setStudents] = useState([]);
-  const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
-  const [manualMhsId, setManualMhsId] = useState('');
-  const [manualCheckIn, setManualCheckIn] = useState('08:00 AM');
-  const [manualCheckOut, setManualCheckOut] = useState('04:00 PM');
-  const [manualStatus, setManualStatus] = useState('Hadir');
-  const [manualDate, setManualDate] = useState(new Date().toISOString().split('T')[0]);
-
   // Broadcast QR Session state
   const [activeSession, setActiveSession] = useState(null);
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
   const [sessionTitle, setSessionTitle] = useState('Presensi Kegiatan Harian KKN');
+  const [sessionDay, setSessionDay] = useState(['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][new Date().getDay()]);
+  const [sessionBatasJam, setSessionBatasJam] = useState('12:00');
   const [selectedScheduleId, setSelectedScheduleId] = useState('');
 
   // Pagination states
@@ -264,7 +257,9 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
       schedule_id: selectedScheduleId ? parseInt(selectedScheduleId) : null,
       qr_token: qrToken,
       status: 'active',
-      opened_at: new Date().toISOString()
+      opened_at: new Date().toISOString(),
+      day: sessionDay,
+      time_end: sessionBatasJam
     };
 
     try {
@@ -273,11 +268,30 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
         .insert(newSession)
         .select();
 
-      if (error) throw error;
-      
-      const savedSession = data && data.length > 0 ? data[0] : newSession;
-      setActiveSession(savedSession);
-      localStorage.setItem('kkn_active_session', JSON.stringify(savedSession));
+      if (error) {
+        console.warn('DB insert with day/time_end columns failed, retrying with serialized title:', error.message);
+        const fallbackSessionData = {
+          title: `${sessionTitle} | Hari: ${sessionDay} | Batas: ${sessionBatasJam}`,
+          dosen_id: user?.email || 'admin',
+          schedule_id: selectedScheduleId ? parseInt(selectedScheduleId) : null,
+          qr_token: qrToken,
+          status: 'active',
+          opened_at: new Date().toISOString()
+        };
+        const retryResult = await supabase
+          .from('sesi_presensi')
+          .insert(fallbackSessionData)
+          .select();
+        
+        if (retryResult.error) throw retryResult.error;
+        const savedSession = retryResult.data && retryResult.data.length > 0 ? retryResult.data[0] : fallbackSessionData;
+        setActiveSession(savedSession);
+        localStorage.setItem('kkn_active_session', JSON.stringify(savedSession));
+      } else {
+        const savedSession = data && data.length > 0 ? data[0] : newSession;
+        setActiveSession(savedSession);
+        localStorage.setItem('kkn_active_session', JSON.stringify(savedSession));
+      }
     } catch (err) {
       console.warn('Failed to start session in Supabase, using localStorage:', err.message);
       const savedSession = {
@@ -1523,183 +1537,6 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
         document.body
       )}
 
-      {isAttendanceModalOpen && createPortal(
-        <div className="modal-overlay" onClick={() => setIsAttendanceModalOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(8px)', zIndex: 99999 }}>
-          <div className="modal-container" style={{ maxWidth: '520px', width: '90%', padding: '1.75rem', background: '#121215', border: '1px solid #27272a', borderRadius: '16px', boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7)' }} onClick={(e) => e.stopPropagation()}>
-            
-            {/* Modal Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid #27272a', paddingBottom: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(37, 99, 235, 0.15)', border: '1px solid rgba(37, 99, 235, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa' }}>
-                  <Users size={22} />
-                </div>
-                <div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f4f4f5', margin: 0 }}>Isi Kehadiran Manual</h3>
-                  <p style={{ fontSize: '0.78rem', color: '#a1a1aa', margin: '0.15rem 0 0 0' }}>Catat log kehadiran mahasiswa KKN secara manual</p>
-                </div>
-              </div>
-              <button 
-                type="button" 
-                onClick={() => setIsAttendanceModalOpen(false)}
-                style={{ background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer', padding: '0.4rem', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            {/* Form Body */}
-            <form onSubmit={handleSaveManualAttendance} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              
-              {/* Select Student */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e4e4e7' }}>Pilih Mahasiswa KKN</label>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <Users size={16} style={{ position: 'absolute', left: '0.85rem', color: '#71717a', pointerEvents: 'none' }} />
-                  <select 
-                    value={manualMhsId} 
-                    onChange={(e) => setManualMhsId(e.target.value)}
-                    style={{ 
-                      width: '100%', 
-                      padding: '0.7rem 0.9rem 0.7rem 2.5rem', 
-                      background: '#18181b', 
-                      border: '1px solid #27272a', 
-                      borderRadius: '8px', 
-                      color: '#f4f4f5', 
-                      fontSize: '0.85rem', 
-                      outline: 'none'
-                    }}
-                    required
-                  >
-                    {students.map(s => (
-                      <option key={s.id} value={s.id} style={{ background: '#18181b', color: '#f4f4f5' }}>
-                        {s.name} - NIM {s.nim} ({s.department || 'Kelompok'})
-                      </option>
-                    ))}
-                    {students.length === 0 && (
-                      <option value="" style={{ background: '#18181b', color: '#f4f4f5' }}>Belum ada mahasiswa terdaftar</option>
-                    )}
-                  </select>
-                </div>
-              </div>
-
-              {/* Status */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e4e4e7' }}>Status Presensi</label>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <UserCheck size={16} style={{ position: 'absolute', left: '0.85rem', color: '#71717a', pointerEvents: 'none' }} />
-                  <select 
-                    value={manualStatus} 
-                    onChange={(e) => setManualStatus(e.target.value)}
-                    style={{ 
-                      width: '100%', 
-                      padding: '0.7rem 0.9rem 0.7rem 2.5rem', 
-                      background: '#18181b', 
-                      border: '1px solid #27272a', 
-                      borderRadius: '8px', 
-                      color: '#f4f4f5', 
-                      fontSize: '0.85rem', 
-                      outline: 'none'
-                    }}
-                    required
-                  >
-                    <option value="Hadir" style={{ background: '#18181b', color: '#f4f4f5' }}>Hadir</option>
-                    <option value="Terlambat" style={{ background: '#18181b', color: '#f4f4f5' }}>Terlambat</option>
-                    <option value="Absen" style={{ background: '#18181b', color: '#f4f4f5' }}>Absen</option>
-                    <option value="Izin" style={{ background: '#18181b', color: '#f4f4f5' }}>Izin</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Date */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e4e4e7' }}>Tanggal Presensi</label>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <Calendar size={16} style={{ position: 'absolute', left: '0.85rem', color: '#71717a', pointerEvents: 'none' }} />
-                  <input 
-                    type="date"
-                    value={manualDate}
-                    onChange={(e) => setManualDate(e.target.value)}
-                    style={{ 
-                      width: '100%', 
-                      padding: '0.7rem 0.9rem 0.7rem 2.5rem', 
-                      background: '#18181b', 
-                      border: '1px solid #27272a', 
-                      borderRadius: '8px', 
-                      color: '#f4f4f5', 
-                      fontSize: '0.85rem', 
-                      outline: 'none'
-                    }}
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Single Waktu Presensi Field */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e4e4e7' }}>Waktu Presensi (Jam Masuk)</label>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <Clock size={16} style={{ position: 'absolute', left: '0.85rem', color: '#71717a', pointerEvents: 'none' }} />
-                  <input 
-                    type="text" 
-                    placeholder="08:00 AM" 
-                    value={manualCheckIn}
-                    onChange={(e) => setManualCheckIn(e.target.value)}
-                    style={{ 
-                      width: '100%', 
-                      padding: '0.7rem 0.9rem 0.7rem 2.5rem', 
-                      background: '#18181b', 
-                      border: '1px solid #27272a', 
-                      borderRadius: '8px', 
-                      color: '#f4f4f5', 
-                      fontSize: '0.85rem', 
-                      outline: 'none'
-                    }}
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Form Actions */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem', paddingTop: '1rem', borderTop: '1px solid #27272a' }}>
-                <button 
-                  type="button" 
-                  onClick={() => setIsAttendanceModalOpen(false)}
-                  style={{
-                    padding: '0.65rem 1.25rem',
-                    background: '#27272a',
-                    color: '#e4e4e7',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  Batal
-                </button>
-                <button 
-                  type="submit" 
-                  style={{
-                    padding: '0.65rem 1.5rem',
-                    background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '0.85rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)'
-                  }}
-                >
-                  Simpan Presensi
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>,
-        document.body
-      )}
-
       {/* Modal 1: Konfigurasi Pembukaan Sesi Presensi QR */}
       {isSessionModalOpen && createPortal(
         <div className="modal-overlay" onClick={() => setIsSessionModalOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(8px)', zIndex: 99999 }}>
@@ -1712,7 +1549,7 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                 </div>
                 <div>
                   <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f4f4f5', margin: 0 }}>Buka Sesi Presensi QR</h3>
-                  <p style={{ fontSize: '0.78rem', color: '#a1a1aa', margin: '0.15rem 0 0 0' }}>Buka sesi presensi untuk semua mahasiswa kelompok Anda</p>
+                  <p style={{ fontSize: '0.78rem', color: '#a1a1aa', margin: '0.15rem 0 0 0' }}>Buka sesi presensi agar tampil di dashboard mahasiswa</p>
                 </div>
               </div>
               <button 
@@ -1725,13 +1562,39 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
             </div>
 
             <form onSubmit={handleStartSession} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              {/* Day Selector */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e4e4e7' }}>Nama / Topik Presensi</label>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e4e4e7' }}>Jadwal Hari</label>
+                <select 
+                  value={sessionDay}
+                  onChange={(e) => setSessionDay(e.target.value)}
+                  style={{ 
+                    width: '100%', 
+                    padding: '0.7rem 0.9rem', 
+                    background: '#18181b', 
+                    border: '1px solid #27272a', 
+                    borderRadius: '8px', 
+                    color: '#f4f4f5', 
+                    fontSize: '0.85rem', 
+                    outline: 'none',
+                    cursor: 'pointer'
+                  }}
+                  required
+                >
+                  {daysOfWeek.map(d => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Title / Kegiatan */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e4e4e7' }}>Nama Kegiatan (Topik)</label>
                 <input 
                   type="text" 
                   value={sessionTitle}
                   onChange={(e) => setSessionTitle(e.target.value)}
-                  placeholder="Contoh: Presensi Pembekalan KKN Desa Parit"
+                  placeholder="Contoh: Kerja Bakti Desa / Koordinasi Lapangan"
                   style={{ 
                     width: '100%', 
                     padding: '0.7rem 0.9rem', 
@@ -1746,17 +1609,13 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                 />
               </div>
 
+              {/* Time Limit / Batas Jam */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e4e4e7' }}>Hubungkan dengan Jadwal Agenda (Opsional)</label>
-                <select 
-                  value={selectedScheduleId}
-                  onChange={(e) => {
-                    setSelectedScheduleId(e.target.value);
-                    const selected = schedules.find(s => s.id.toString() === e.target.value);
-                    if (selected) {
-                      setSessionTitle(`Presensi: ${selected.title}`);
-                    }
-                  }}
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e4e4e7' }}>Batas Jam (Waktu Selesai)</label>
+                <input 
+                  type="time" 
+                  value={sessionBatasJam}
+                  onChange={(e) => setSessionBatasJam(e.target.value)}
                   style={{ 
                     width: '100%', 
                     padding: '0.7rem 0.9rem', 
@@ -1765,6 +1624,34 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                     borderRadius: '8px', 
                     color: '#f4f4f5', 
                     fontSize: '0.85rem', 
+                    outline: 'none'
+                  }}
+                  required
+                />
+              </div>
+
+              {/* Select Agenda schedule reference (optional helper to autofill) */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <label style={{ fontSize: '0.8rem', color: '#a1a1aa' }}>Pilih dari Agenda Kegiatan (Autofill)</label>
+                <select 
+                  value={selectedScheduleId}
+                  onChange={(e) => {
+                    setSelectedScheduleId(e.target.value);
+                    const selected = schedules.find(s => s.id.toString() === e.target.value);
+                    if (selected) {
+                      setSessionTitle(selected.title);
+                      setSessionDay(selected.day);
+                      setSessionBatasJam(selected.timeEnd);
+                    }
+                  }}
+                  style={{ 
+                    width: '100%', 
+                    padding: '0.7rem 0.9rem', 
+                    background: '#18181b', 
+                    border: '1px solid #27272a', 
+                    borderRadius: '8px', 
+                    color: '#a1a1aa', 
+                    fontSize: '0.8rem', 
                     outline: 'none',
                     cursor: 'pointer'
                   }}
