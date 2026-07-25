@@ -18,7 +18,7 @@ export default function MahasiswaTopbar({ user }) {
           </span>
         </h1>
         <span className="topbar-page-sub" style={{ color: '#64748b' }}>
-          Kelompok 14 - Desa Sukamaju • DPL: Dr. Ir. Hendra Wijaya, M.T.
+          {user?.kelompok || 'Kelompok KKN'}
         </span>
       </div>
 

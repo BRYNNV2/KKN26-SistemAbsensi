@@ -147,9 +147,9 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
 
     const newLog = {
       id: Date.now(),
-      name: user?.name || 'Budi Pratama',
-      nim: user?.nim || '21081010045',
-      group: 'Kelompok 14 - Sukamaju',
+      name: user?.name || '-',
+      nim: user?.nim || '-',
+      group: user?.kelompok || '-',
       checkIn: timeStr,
       status: 'Hadir',
       date: dateStr
@@ -257,17 +257,17 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                       <span>PORTAL AKADEMIK MAHASISWA KKN62</span>
                     </div>
                     <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                      Selamat Datang, {user?.name || 'Budi Pratama'}! 👋
+                      Selamat Datang, {user?.name || 'Mahasiswa'}! 👋
                     </h2>
                     <p style={{ color: '#475569', fontSize: '0.88rem', margin: '0.4rem 0 0 0' }}>
-                      NIM: {user?.nim || '21081010045'} • Kelompok 14 (Desa Sukamaju, Kecamatan Serumpun)
+                      NIM: {user?.nim || '-'} • {user?.kelompok || 'Kelompok KKN'}
                     </p>
                   </div>
 
                   <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1rem 1.25rem', textAlign: 'right' }}>
                     <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Dosen Pembimbing Lapangan (DPL):</div>
                     <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
-                      Dr. Ir. Hendra Wijaya, M.T.
+                      {user?.metadata?.dosen_dpl || 'Dosen DPL'}
                     </div>
                   </div>
                 </div>
@@ -588,7 +588,7 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                       <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
                         <td style={{ padding: '0.85rem 1rem', fontWeight: 600 }}>{log.date || 'Hari Ini'}</td>
                         <td style={{ padding: '0.85rem 1rem', fontWeight: 700, color: '#16a34a' }}>{log.checkIn || log.check_in || '08:15 AM'}</td>
-                        <td style={{ padding: '0.85rem 1rem', color: '#64748b' }}>{log.group || 'Kelompok 14 - Sukamaju'}</td>
+                        <td style={{ padding: '0.85rem 1rem', color: '#64748b' }}>{log.group || user?.kelompok || '-'}</td>
                         <td style={{ padding: '0.85rem 1rem' }}>
                           <span style={{
                             padding: '0.25rem 0.65rem',
@@ -624,17 +624,17 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 <div>
                   <label style={{ fontSize: '0.8rem', color: '#64748b', display: 'block', marginBottom: '0.3rem', fontWeight: 600 }}>Nama Lengkap</label>
-                  <input type="text" value={user?.name || 'Budi Pratama'} readOnly style={{ width: '100%', padding: '0.7rem 0.9rem', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '6px', color: '#0f172a' }} />
+                  <input type="text" value={user?.name || '-'} readOnly style={{ width: '100%', padding: '0.7rem 0.9rem', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '6px', color: '#0f172a' }} />
                 </div>
 
                 <div>
                   <label style={{ fontSize: '0.8rem', color: '#64748b', display: 'block', marginBottom: '0.3rem', fontWeight: 600 }}>NIM Mahasiswa</label>
-                  <input type="text" value={user?.nim || '21081010045'} readOnly style={{ width: '100%', padding: '0.7rem 0.9rem', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '6px', color: '#0f172a' }} />
+                  <input type="text" value={user?.nim || '-'} readOnly style={{ width: '100%', padding: '0.7rem 0.9rem', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '6px', color: '#0f172a' }} />
                 </div>
 
                 <div>
                   <label style={{ fontSize: '0.8rem', color: '#64748b', display: 'block', marginBottom: '0.3rem', fontWeight: 600 }}>Kelompok KKN</label>
-                  <input type="text" value="Kelompok 14 - Desa Sukamaju" readOnly style={{ width: '100%', padding: '0.7rem 0.9rem', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '6px', color: '#0f172a' }} />
+                  <input type="text" value={user?.kelompok || '-'} readOnly style={{ width: '100%', padding: '0.7rem 0.9rem', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '6px', color: '#0f172a' }} />
                 </div>
 
                 <div>

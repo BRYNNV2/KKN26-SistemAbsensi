@@ -58,10 +58,10 @@ export default function MahasiswaSidebar({
       {!collapsed && (
         <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '0.85rem', marginBottom: '1.25rem' }}>
           <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700 }}>
-            Kelompok KKN 14
+            {user?.kelompok || 'Kelompok KKN'}
           </div>
           <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a', marginTop: '0.2rem' }}>
-            Desa Sukamaju
+            {user?.name || 'Mahasiswa'}
           </div>
           <div style={{ fontSize: '0.75rem', color: '#16a34a', marginTop: '0.25rem', fontWeight: 600 }}>
             ● Status Aktif KKN

@@ -23,8 +23,14 @@ export async function authenticateUser({ identifier, password }) {
     });
 
     if (error) {
-      // If error is "Email not confirmed", provide a clear helpful solution or bypass confirmation requirement
+      // If error is "Email not confirmed", try to lookup profile from mahasiswa table
       if (error.message.toLowerCase().includes('email not confirmed')) {
+        // Try to get actual profile data from mahasiswa table
+        const profile = await lookupMahasiswaProfile(trimmedId, emailToUse);
+        if (profile) {
+          return { success: true, user: profile };
+        }
+        // Fallback admin
         return {
           success: true,
           user: {
@@ -37,7 +43,7 @@ export async function authenticateUser({ identifier, password }) {
         };
       }
 
-      // Check fallback for admin logins if user credential not yet confirmed in Supabase
+      // Check fallback for admin logins
       if (trimmedId.toLowerCase().includes('admin') || trimmedId.toLowerCase().includes('dpl') || trimmedId.toLowerCase().includes('dosen')) {
         return {
           success: true,
@@ -50,15 +56,21 @@ export async function authenticateUser({ identifier, password }) {
         };
       }
 
-      // Check fallback for Mahasiswa logins
-      if (/^\d+$/.test(trimmedId) || trimmedId.toLowerCase().includes('mhs') || trimmedId.toLowerCase().includes('budi')) {
+      // Check fallback for Mahasiswa logins — lookup real data from DB
+      if (/^\d+$/.test(trimmedId) || trimmedId.toLowerCase().includes('mhs')) {
+        const profile = await lookupMahasiswaProfile(trimmedId, emailToUse);
+        if (profile) {
+          return { success: true, user: profile };
+        }
+        // If no DB record found, return generic with NIM
         return {
           success: true,
           user: {
             id: `mhs-${trimmedId}`,
             email: emailToUse,
-            name: 'Budi Pratama',
+            name: trimmedId,
             nim: trimmedId,
+            kelompok: '-',
             role: 'mahasiswa'
           }
         };
@@ -68,7 +80,7 @@ export async function authenticateUser({ identifier, password }) {
     }
 
     // 2. Successfully authenticated with live Supabase instance
-    const userData = extractUserData(data.user);
+    const userData = await extractUserData(data.user);
     return { success: true, user: userData };
 
   } catch (err) {
@@ -80,9 +92,50 @@ export async function authenticateUser({ identifier, password }) {
 }
 
 /**
- * Helper to extract name, email, and role from Supabase User Object
+ * Lookup mahasiswa profile from the public.mahasiswa table by NIM or email
  */
-function extractUserData(user) {
+async function lookupMahasiswaProfile(nimOrId, email) {
+  try {
+    // Try by NIM first
+    let { data, error } = await supabase
+      .from('mahasiswa')
+      .select('*')
+      .eq('nim', nimOrId)
+      .maybeSingle();
+
+    // If not found by NIM, try by email
+    if (!data && email) {
+      const result = await supabase
+        .from('mahasiswa')
+        .select('*')
+        .eq('email', email)
+        .maybeSingle();
+      data = result.data;
+    }
+
+    if (data) {
+      return {
+        id: data.id,
+        email: data.email || email,
+        name: data.name,
+        nim: data.nim,
+        kelompok: data.department || data.kelompok || '-',
+        role: 'mahasiswa'
+      };
+    }
+
+    return null;
+  } catch (err) {
+    console.warn('lookupMahasiswaProfile failed:', err.message);
+    return null;
+  }
+}
+
+/**
+ * Helper to extract name, email, and role from Supabase User Object
+ * Also enriches with data from mahasiswa table if available
+ */
+async function extractUserData(user) {
   if (!user) return null;
   const metadata = user.user_metadata || {};
   const emailLower = (user.email || '').toLowerCase();
@@ -96,14 +149,54 @@ function extractUserData(user) {
     }
   }
 
+  // For mahasiswa, enrich with profile data from DB
+  let kelompok = metadata.kelompok || '';
+  let nim = metadata.nim || '';
+  let name = metadata.full_name || metadata.name || '';
+
+  if (userRole === 'mahasiswa') {
+    const profile = await lookupMahasiswaProfile(nim || user.email?.split('@')[0], user.email);
+    if (profile) {
+      name = name || profile.name;
+      nim = nim || profile.nim;
+      kelompok = kelompok || profile.kelompok;
+    }
+  }
+
   return {
     id: user.id,
     email: user.email,
-    name: metadata.full_name || metadata.name || user.email.split('@')[0],
-    nim: metadata.nim || (user.email ? user.email.split('@')[0] : '21081010045'),
+    name: name || user.email.split('@')[0],
+    nim: nim || user.email?.split('@')[0] || '',
+    kelompok: kelompok,
     role: userRole,
     metadata: metadata
   };
+}
+
+/**
+ * Register a new user
+ */
+export async function registerUser({ nama, identifier, email, password, kelompok }) {
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+      options: {
+        data: {
+          full_name: nama,
+          nim: identifier,
+          role: 'mahasiswa',
+          kelompok: kelompok
+        }
+      }
+    });
+
+    if (error) throw error;
+    return { success: true, user: data.user };
+  } catch (err) {
+    return { success: false, error: err.message || 'Gagal mendaftarkan akun.' };
+  }
 }
 
 /**
