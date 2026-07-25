@@ -695,18 +695,23 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                     <option value="Izin">Izin</option>
                   </select>
                 </div>
-
-                <div className="toolbar-right" style={{ gap: '0.6rem' }}>
+                                <div className="toolbar-right" style={{ gap: '0.6rem', display: 'flex', alignItems: 'center' }}>
                   {activeSession ? (
-                    <button 
-                      type="button" 
-                      className="btn-add-employee" 
-                      onClick={() => checkActiveSession()} 
-                      style={{ background: '#16a34a', borderColor: '#16a34a', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-                    >
-                      <Sparkles size={16} className="sparkle-pulsing" />
-                      <span>Sesi Presensi Aktif</span>
-                    </button>
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '0.55rem 0.85rem', borderRadius: '8px', color: '#166534', fontSize: '0.82rem', fontWeight: 700 }}>
+                        <Sparkles size={14} className="sparkle-pulsing" style={{ color: '#16a34a' }} />
+                        <span>Sesi Aktif: {activeSession.title.split(' | ')[0]} (Batas: {activeSession.time_end || (activeSession.title.includes('Batas:') ? activeSession.title.split('Batas: ')[1] : 'Selesai')})</span>
+                      </div>
+                      <button 
+                        type="button" 
+                        className="btn-add-employee" 
+                        onClick={handleCloseSession} 
+                        style={{ background: '#ef4444', borderColor: '#ef4444', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem' }}
+                      >
+                        <XCircle size={15} />
+                        <span>Akhiri Sesi</span>
+                      </button>
+                    </>
                   ) : (
                     <button 
                       type="button" 
@@ -722,7 +727,7 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                     </button>
                   )}
                   
-                  <button className="tab-filter-btn" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <button className="tab-filter-btn" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', height: '38px' }}>
                     <Download size={15} />
                     <span>Ekspor CSV</span>
                   </button>
@@ -1677,112 +1682,6 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                 </button>
               </div>
             </form>
-          </div>
-        </div>,
-        document.body
-      )}
-
-      {/* Modal 2: Dashboard Realtime Sesi Presensi QR Aktif */}
-      {activeSession && createPortal(
-        <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(9, 9, 11, 0.9)', backdropFilter: 'blur(10px)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-          <div className="modal-container" style={{ maxWidth: '900px', width: '100%', padding: '2rem', background: '#121215', border: '1px solid #27272a', borderRadius: '20px', boxShadow: '0 25px 70px rgba(0, 0, 0, 0.9)', display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: '2.5rem' }}>
-            
-            {/* Left Side: Broadcast Status & Session Details (NO QR shown) */}
-            <div style={{ display: 'flex', flexDirection: 'column', borderRight: '1px solid #27272a', paddingRight: '2rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.25rem' }}>
-                <Sparkles size={20} style={{ color: '#10b981' }} />
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f4f4f5', margin: 0 }}>Sesi Presensi Terbroadcast</h3>
-              </div>
-
-              <div style={{ background: '#18181b', padding: '1.25rem', borderRadius: '12px', border: '1px solid #27272a', marginBottom: '1.5rem' }}>
-                <div style={{ fontSize: '0.72rem', color: '#a1a1aa', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>Topik / Kegiatan KKN</div>
-                <h4 style={{ margin: '0.25rem 0 0.75rem 0', fontSize: '1.05rem', color: '#ffffff', fontWeight: 800 }}>{activeSession.title}</h4>
-                
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', paddingTop: '0.75rem', borderTop: '1px solid #27272a' }}>
-                  <div>
-                    <span style={{ fontSize: '0.7rem', color: '#71717a', display: 'block' }}>Jadwal Hari:</span>
-                    <span style={{ fontSize: '0.85rem', color: '#f4f4f5', fontWeight: 700 }}>{activeSession.day || 'Hari Ini'}</span>
-                  </div>
-                  <div>
-                    <span style={{ fontSize: '0.7rem', color: '#71717a', display: 'block' }}>Batas Waktu:</span>
-                    <span style={{ fontSize: '0.85rem', color: '#ef4444', fontWeight: 700 }}>s/d {activeSession.time_end || 'Selesai'}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Status Broadcast Animation Indicator */}
-              <div style={{ background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)', padding: '1rem', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
-                <span className="dot emerald sparkle-pulsing" style={{ width: '10px', height: '10px', background: '#10b981', borderRadius: '50%', display: 'inline-block' }} />
-                <div>
-                  <span style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 700, display: 'block' }}>Status: Sesi Aktif</span>
-                  <span style={{ fontSize: '0.72rem', color: '#a1a1aa' }}>Telah terkirim ke dashboard masing-masing mahasiswa.</span>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginTop: 'auto' }}>
-                <button 
-                  type="button" 
-                  onClick={handleCloseSession}
-                  style={{ width: '100%', padding: '0.85rem', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', color: '#ffffff', fontSize: '0.9rem', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 14px rgba(239, 68, 68, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
-                >
-                  <XCircle size={18} />
-                  <span>Akhiri / Tutup Sesi Presensi</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Right Side: Real-time Checked-in Students List */}
-            <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '500px' }}>
-              <div style={{ borderBottom: '1px solid #27272a', paddingBottom: '0.75rem', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h4 style={{ margin: 0, fontSize: '1rem', color: '#ffffff', fontWeight: 700 }}>Mahasiswa Sudah Absen</h4>
-                <span style={{ fontSize: '0.8rem', background: '#27272a', padding: '0.2rem 0.6rem', borderRadius: '20px', color: '#f4f4f5', fontWeight: 700 }}>
-                  {attendanceData.filter(a => a.date === new Date().toLocaleDateString('id-ID')).length} Orang
-                </span>
-              </div>
-
-              <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', paddingRight: '4px' }}>
-                {attendanceData.filter(a => a.date === new Date().toLocaleDateString('id-ID')).map((student, idx) => (
-                  <div 
-                    key={student.id || idx} 
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: '#18181b', border: '1px solid #27272a', borderRadius: '10px' }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <img 
-                        src={student.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=e2e8f0&color=0f172a&bold=true`} 
-                        alt={student.name} 
-                        style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }} 
-                      />
-                      <div>
-                        <h5 style={{ margin: 0, fontSize: '0.85rem', color: '#ffffff', fontWeight: 700 }}>{student.name}</h5>
-                        <span style={{ fontSize: '0.72rem', color: '#71717a' }}>NIM: {student.nim}</span>
-                      </div>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <span style={{ fontSize: '0.78rem', color: '#34d399', fontWeight: 700 }}>{student.checkIn}</span>
-                      <span style={{ fontSize: '0.65rem', display: 'block', color: '#71717a' }}>{student.group || 'Kelompok'}</span>
-                    </div>
-                  </div>
-                ))}
-
-                {attendanceData.filter(a => a.date === new Date().toLocaleDateString('id-ID')).length === 0 && (
-                  <div style={{ textAlign: 'center', padding: '4rem 1rem', color: '#71717a' }}>
-                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>⏳</div>
-                    <p style={{ fontSize: '0.85rem', margin: 0 }}>Menunggu mahasiswa melakukan presensi...</p>
-                  </div>
-                )}
-              </div>
-              
-              <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
-                <button 
-                  type="button" 
-                  onClick={() => setActiveSession(null)} 
-                  style={{ padding: '0.5rem 1rem', background: '#27272a', border: 'none', color: '#f4f4f5', borderRadius: '6px', fontSize: '0.8rem', cursor: 'pointer' }}
-                >
-                  Sembunyikan Jendela QR
-                </button>
-              </div>
-            </div>
-
           </div>
         </div>,
         document.body
