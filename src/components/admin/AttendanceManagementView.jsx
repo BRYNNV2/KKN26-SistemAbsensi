@@ -251,10 +251,38 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
   const handleStartSession = async (e) => {
     if (e) e.preventDefault();
     const qrToken = `session-${Date.now()}`;
+    
+    let targetScheduleId = selectedScheduleId ? parseInt(selectedScheduleId) : null;
+
+    // Create a new card in the schedules table if no existing schedule reference was selected
+    if (!targetScheduleId) {
+      try {
+        const timeStart = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+        const { data: insertedSched, error: schedErr } = await supabase
+          .from('schedules')
+          .insert({
+            title: sessionTitle,
+            code: `ABS-${Date.now().toString().slice(-4)}`,
+            day: sessionDay,
+            time_start: timeStart,
+            time_end: sessionBatasJam,
+            group_kkn: user?.kelompok || 'Semua Kelompok',
+            location: 'Posko KKN'
+          })
+          .select();
+        
+        if (!schedErr && insertedSched && insertedSched.length > 0) {
+          targetScheduleId = insertedSched[0].id;
+        }
+      } catch (scheduleErr) {
+        console.warn('Failed to insert schedule card for session:', scheduleErr.message);
+      }
+    }
+
     const newSession = {
       title: sessionTitle,
       dosen_id: user?.email || 'admin',
-      schedule_id: selectedScheduleId ? parseInt(selectedScheduleId) : null,
+      schedule_id: targetScheduleId,
       qr_token: qrToken,
       status: 'active',
       opened_at: new Date().toISOString(),
@@ -273,7 +301,7 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
         const fallbackSessionData = {
           title: `${sessionTitle} | Hari: ${sessionDay} | Batas: ${sessionBatasJam}`,
           dosen_id: user?.email || 'admin',
-          schedule_id: selectedScheduleId ? parseInt(selectedScheduleId) : null,
+          schedule_id: targetScheduleId,
           qr_token: qrToken,
           status: 'active',
           opened_at: new Date().toISOString()
@@ -301,6 +329,32 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
       setActiveSession(savedSession);
       localStorage.setItem('kkn_active_session', JSON.stringify(savedSession));
     }
+
+    // Append to local storage schedules cache so it renders immediately on both panels
+    const cachedSchedules = localStorage.getItem('kkn_schedules_cached');
+    if (cachedSchedules) {
+      const list = JSON.parse(cachedSchedules);
+      const exists = list.some(s => s.title === sessionTitle && s.day === sessionDay);
+      if (!exists) {
+        const localSched = {
+          id: targetScheduleId || Date.now(),
+          title: sessionTitle,
+          code: `ABS-${Date.now().toString().slice(-4)}`,
+          day: sessionDay,
+          timeStart: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+          timeEnd: sessionBatasJam,
+          group: user?.kelompok || 'Semua Kelompok',
+          location: 'Posko KKN'
+        };
+        list.push(localSched);
+        localStorage.setItem('kkn_schedules_cached', JSON.stringify(list));
+        setSchedules(list);
+      }
+    }
+    
+    // Trigger refreshing the schedules list from the database
+    fetchSchedules();
+
     setIsSessionModalOpen(false);
   };
 
