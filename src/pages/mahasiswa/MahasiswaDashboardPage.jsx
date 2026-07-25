@@ -126,10 +126,15 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
     }
   };
 
-  // Perform Check In / Check Out action
+  // Perform Single Attendance Record action
   const handlePerformAttendance = async () => {
     if (!isScheduleInputtedByDosen) {
       alert('Jadwal presensi belum diinput oleh Dosen DPL untuk hari ini. Silakan hubungi Dosen DPL.');
+      return;
+    }
+
+    if (isCheckedIn) {
+      alert('Anda sudah melakukan presensi kehadiran untuk hari ini.');
       return;
     }
 
@@ -137,53 +142,36 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const dateStr = now.toLocaleDateString('id-ID');
 
-    if (!isCheckedIn) {
-      // Check In
-      setIsCheckedIn(true);
-      setCheckInTime(timeStr);
+    setIsCheckedIn(true);
+    setCheckInTime(timeStr);
 
-      const newLog = {
-        id: Date.now(),
-        name: user?.name || 'Budi Pratama',
-        nim: user?.nim || '21081010045',
-        group: 'Kelompok 14 - Sukamaju',
-        checkIn: timeStr,
-        checkOut: '--:--',
-        hours: 'Sedang Berlangsung',
+    const newLog = {
+      id: Date.now(),
+      name: user?.name || 'Budi Pratama',
+      nim: user?.nim || '21081010045',
+      group: 'Kelompok 14 - Sukamaju',
+      checkIn: timeStr,
+      status: 'Hadir',
+      date: dateStr
+    };
+
+    const updated = [newLog, ...myAttendanceLogs];
+    setMyAttendanceLogs(updated);
+
+    try {
+      await supabase.from('attendance').insert({
+        mahasiswa_id: user?.id || 'mhs-1',
+        check_in: timeStr,
+        hours: 'Hadir',
         status: 'Hadir',
         date: dateStr
-      };
-
-      const updated = [newLog, ...myAttendanceLogs];
-      setMyAttendanceLogs(updated);
-
-      try {
-        await supabase.from('attendance').insert({
-          mahasiswa_id: user?.id || 'mhs-1',
-          check_in: timeStr,
-          check_out: '',
-          hours: '8h 0m',
-          status: 'Hadir',
-          date: dateStr
-        });
-      } catch (err) {
-        console.warn('Database insert failed, saved to local cache:', err.message);
-        localStorage.setItem('kkn_attendance_cached', JSON.stringify(updated));
-      }
-
-      alert(`Presensi Masuk Berhasil pada jam ${timeStr}!`);
-    } else {
-      // Check Out
-      setCheckOutTime(timeStr);
-      const updated = myAttendanceLogs.map((log, idx) => {
-        if (idx === 0) {
-          return { ...log, checkOut: timeStr, hours: '8j 15m' };
-        }
-        return log;
       });
-      setMyAttendanceLogs(updated);
-      alert(`Presensi Pulang Berhasil pada jam ${timeStr}!`);
+    } catch (err) {
+      console.warn('Database insert failed, saved to local cache:', err.message);
+      localStorage.setItem('kkn_attendance_cached', JSON.stringify(updated));
     }
+
+    alert(`Presensi Kehadiran Berhasil pada jam ${timeStr}!`);
   };
 
   // Handle Logbook Form Submission
@@ -386,21 +374,12 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                       </div>
                     )}
 
-                    {/* Check In / Out Time Status Details */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
-                        <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', fontWeight: 600 }}>Jam Masuk (Check In)</span>
-                        <span style={{ fontSize: '1.25rem', fontWeight: 800, color: isCheckedIn ? '#16a34a' : '#94a3b8', marginTop: '0.2rem', display: 'block' }}>
-                          {isCheckedIn ? checkInTime : '--:--'}
-                        </span>
-                      </div>
-
-                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
-                        <span style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', fontWeight: 600 }}>Jam Pulang (Check Out)</span>
-                        <span style={{ fontSize: '1.25rem', fontWeight: 800, color: checkOutTime ? '#2563eb' : '#94a3b8', marginTop: '0.2rem', display: 'block' }}>
-                          {checkOutTime || '--:--'}
-                        </span>
-                      </div>
+                    {/* Single Presence Time Status Details */}
+                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem', textAlign: 'center', marginBottom: '1.5rem' }}>
+                      <span style={{ fontSize: '0.78rem', color: '#64748b', display: 'block', fontWeight: 600 }}>Waktu Catatan Presensi</span>
+                      <span style={{ fontSize: '1.6rem', fontWeight: 800, color: isCheckedIn ? '#16a34a' : '#94a3b8', marginTop: '0.2rem', display: 'block' }}>
+                        {isCheckedIn ? checkInTime : '--:--'}
+                      </span>
                     </div>
                   </div>
 
@@ -408,50 +387,50 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                     <button
                       onClick={handlePerformAttendance}
-                      disabled={!isScheduleInputtedByDosen}
+                      disabled={!isScheduleInputtedByDosen || isCheckedIn}
                       style={{
                         width: '100%',
                         padding: '0.85rem',
                         borderRadius: '8px',
                         border: 'none',
-                        background: !isScheduleInputtedByDosen 
+                        background: (!isScheduleInputtedByDosen || isCheckedIn) 
                           ? '#e2e8f0'
-                          : (isCheckedIn ? '#0f172a' : '#16a34a'),
-                        color: !isScheduleInputtedByDosen ? '#94a3b8' : '#ffffff',
+                          : '#16a34a',
+                        color: (!isScheduleInputtedByDosen || isCheckedIn) ? '#64748b' : '#ffffff',
                         fontSize: '0.9rem',
                         fontWeight: 700,
-                        cursor: !isScheduleInputtedByDosen ? 'not-allowed' : 'pointer',
+                        cursor: (!isScheduleInputtedByDosen || isCheckedIn) ? 'not-allowed' : 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: '0.6rem',
-                        boxShadow: isScheduleInputtedByDosen ? '0 2px 8px rgba(0,0,0,0.1)' : 'none'
+                        boxShadow: (isScheduleInputtedByDosen && !isCheckedIn) ? '0 2px 8px rgba(22,163,74,0.2)' : 'none'
                       }}
                     >
                       <CheckCircle2 size={19} />
-                      <span>{isCheckedIn ? 'PULANG / CHECK OUT SEKARANG' : '📌 PRESENSI MASUK SEKARANG'}</span>
+                      <span>{isCheckedIn ? '✓ PRESENSI HARI INI TELAH TERCATAT' : '📌 PRESENSI KEHADIRAN SEKARANG'}</span>
                     </button>
 
                     <button
                       onClick={handleScanQrAction}
-                      disabled={!isScheduleInputtedByDosen}
+                      disabled={!isScheduleInputtedByDosen || isCheckedIn}
                       style={{
                         width: '100%',
                         padding: '0.75rem',
                         borderRadius: '8px',
-                        border: !isScheduleInputtedByDosen ? '1px solid #e2e8f0' : '1px solid #cbd5e1',
-                        background: !isScheduleInputtedByDosen ? '#f8fafc' : '#ffffff',
-                        color: !isScheduleInputtedByDosen ? '#cbd5e1' : '#0f172a',
+                        border: (!isScheduleInputtedByDosen || isCheckedIn) ? '1px solid #e2e8f0' : '1px solid #cbd5e1',
+                        background: (!isScheduleInputtedByDosen || isCheckedIn) ? '#f8fafc' : '#ffffff',
+                        color: (!isScheduleInputtedByDosen || isCheckedIn) ? '#cbd5e1' : '#0f172a',
                         fontSize: '0.85rem',
                         fontWeight: 700,
-                        cursor: !isScheduleInputtedByDosen ? 'not-allowed' : 'pointer',
+                        cursor: (!isScheduleInputtedByDosen || isCheckedIn) ? 'not-allowed' : 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: '0.5rem'
                       }}
                     >
-                      <QrCode size={18} style={{ color: isScheduleInputtedByDosen ? '#0f172a' : '#cbd5e1' }} />
+                      <QrCode size={18} style={{ color: (isScheduleInputtedByDosen && !isCheckedIn) ? '#0f172a' : '#cbd5e1' }} />
                       <span>Pindai Kode QR Posko KKN</span>
                     </button>
                   </div>
@@ -607,9 +586,8 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                   <thead>
                     <tr style={{ borderBottom: '1px solid #e2e8f0', color: '#64748b', textAlign: 'left', background: '#f8fafc' }}>
                       <th style={{ padding: '0.75rem 1rem' }}>TANGGAL</th>
-                      <th style={{ padding: '0.75rem 1rem' }}>JAM MASUK</th>
-                      <th style={{ padding: '0.75rem 1rem' }}>JAM PULANG</th>
-                      <th style={{ padding: '0.75rem 1rem' }}>DURASI</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>WAKTU PRESENSI</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>KELOMPOK / POSKO</th>
                       <th style={{ padding: '0.75rem 1rem' }}>STATUS</th>
                     </tr>
                   </thead>
@@ -617,9 +595,8 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                     {myAttendanceLogs.map((log, idx) => (
                       <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
                         <td style={{ padding: '0.85rem 1rem', fontWeight: 600 }}>{log.date || 'Hari Ini'}</td>
-                        <td style={{ padding: '0.85rem 1rem' }}>{log.checkIn || log.check_in || '08:15 AM'}</td>
-                        <td style={{ padding: '0.85rem 1rem' }}>{log.checkOut || log.check_out || '04:00 PM'}</td>
-                        <td style={{ padding: '0.85rem 1rem' }}>{log.hours || '8j 0m'}</td>
+                        <td style={{ padding: '0.85rem 1rem', fontWeight: 700, color: '#16a34a' }}>{log.checkIn || log.check_in || '08:15 AM'}</td>
+                        <td style={{ padding: '0.85rem 1rem', color: '#64748b' }}>{log.group || 'Kelompok 14 - Sukamaju'}</td>
                         <td style={{ padding: '0.85rem 1rem' }}>
                           <span style={{
                             padding: '0.25rem 0.65rem',
@@ -636,7 +613,7 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                     ))}
                     {myAttendanceLogs.length === 0 && (
                       <tr>
-                        <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                        <td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
                           Belum ada riwayat kehadiran tercatat.
                         </td>
                       </tr>

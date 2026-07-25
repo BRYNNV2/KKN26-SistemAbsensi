@@ -600,9 +600,7 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                         <th>Mahasiswa</th>
                         <th>NIM</th>
                         <th>Kelompok</th>
-                        <th>Jam Masuk</th>
-                        <th>Jam Pulang</th>
-                        <th>Total Jam</th>
+                        <th>Waktu Presensi</th>
                         <th>Status</th>
                         <th style={{ textAlign: 'center' }}>Aksi</th>
                       </tr>
@@ -618,9 +616,7 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                           </td>
                           <td><span className="nim-cell">{act.nim}</span></td>
                           <td><span>{act.group}</span></td>
-                          <td><span>{act.checkIn}</span></td>
-                          <td><span>{act.checkOut}</span></td>
-                          <td><span>{act.hours}</span></td>
+                          <td><span style={{ fontWeight: 700, color: '#10b981' }}>{act.checkIn}</span></td>
                           <td>
                             <span className={`status-badge ${
                               act.status === 'Hadir' ? 'success' :
@@ -641,7 +637,7 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                       ))}
                       {paginatedAttendance.length === 0 && (
                         <tr>
-                          <td colSpan="8" style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-light)' }}>
+                          <td colSpan="6" style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-light)' }}>
                             Tidak ada data kehadiran ditemukan.
                           </td>
                         </tr>
@@ -1510,54 +1506,28 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                 </div>
               </div>
 
-              {/* Check In / Out Row */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e4e4e7' }}>Jam Masuk (Check In)</label>
-                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                    <Clock size={16} style={{ position: 'absolute', left: '0.85rem', color: '#71717a', pointerEvents: 'none' }} />
-                    <input 
-                      type="text" 
-                      placeholder="08:00 AM" 
-                      value={manualCheckIn}
-                      onChange={(e) => setManualCheckIn(e.target.value)}
-                      style={{ 
-                        width: '100%', 
-                        padding: '0.7rem 0.9rem 0.7rem 2.5rem', 
-                        background: '#18181b', 
-                        border: '1px solid #27272a', 
-                        borderRadius: '8px', 
-                        color: '#f4f4f5', 
-                        fontSize: '0.85rem', 
-                        outline: 'none'
-                      }}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e4e4e7' }}>Jam Pulang (Check Out)</label>
-                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                    <Clock size={16} style={{ position: 'absolute', left: '0.85rem', color: '#71717a', pointerEvents: 'none' }} />
-                    <input 
-                      type="text" 
-                      placeholder="04:00 PM" 
-                      value={manualCheckOut}
-                      onChange={(e) => setManualCheckOut(e.target.value)}
-                      style={{ 
-                        width: '100%', 
-                        padding: '0.7rem 0.9rem 0.7rem 2.5rem', 
-                        background: '#18181b', 
-                        border: '1px solid #27272a', 
-                        borderRadius: '8px', 
-                        color: '#f4f4f5', 
-                        fontSize: '0.85rem', 
-                        outline: 'none'
-                      }}
-                      required
-                    />
-                  </div>
+              {/* Single Waktu Presensi Field */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e4e4e7' }}>Waktu Presensi (Jam Masuk)</label>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <Clock size={16} style={{ position: 'absolute', left: '0.85rem', color: '#71717a', pointerEvents: 'none' }} />
+                  <input 
+                    type="text" 
+                    placeholder="08:00 AM" 
+                    value={manualCheckIn}
+                    onChange={(e) => setManualCheckIn(e.target.value)}
+                    style={{ 
+                      width: '100%', 
+                      padding: '0.7rem 0.9rem 0.7rem 2.5rem', 
+                      background: '#18181b', 
+                      border: '1px solid #27272a', 
+                      borderRadius: '8px', 
+                      color: '#f4f4f5', 
+                      fontSize: '0.85rem', 
+                      outline: 'none'
+                    }}
+                    required
+                  />
                 </div>
               </div>
 
