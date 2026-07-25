@@ -41,6 +41,15 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
   const [selectedScheduleDetails, setSelectedScheduleDetails] = useState(null);
   const [detailsTab, setDetailsTab] = useState('jurnal'); // 'RPS', 'jurnal', 'nilai', 'info'
 
+  // Manual Attendance entry form states
+  const [students, setStudents] = useState([]);
+  const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
+  const [manualMhsId, setManualMhsId] = useState('');
+  const [manualCheckIn, setManualCheckIn] = useState('08:00 AM');
+  const [manualCheckOut, setManualCheckOut] = useState('04:00 PM');
+  const [manualStatus, setManualStatus] = useState('Hadir');
+  const [manualDate, setManualDate] = useState(new Date().toISOString().split('T')[0]);
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 7;
@@ -58,6 +67,7 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
 
     fetchSchedules();
     fetchAttendance();
+    fetchStudents();
 
     return () => clearInterval(timer);
   }, []);
@@ -191,6 +201,88 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
   const [agendaTimeEnd, setAgendaTimeEnd] = useState('10:30');
   const [agendaGroup, setAgendaGroup] = useState('');
   const [agendaLocation, setAgendaLocation] = useState('');
+
+  const fetchStudents = async () => {
+    try {
+      const { data, error } = await supabase.from('mahasiswa').select('id, name, nim, department');
+      if (error) {
+        throw error;
+      }
+      if (data) {
+        setStudents(data);
+        if (data.length > 0) {
+          setManualMhsId(data[0].id);
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to load students list for manual attendance:', err.message);
+      // Fallback from localStorage
+      const cached = localStorage.getItem('kkn_mahasiswa_cached');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        setStudents(parsed);
+        if (parsed.length > 0) {
+          setManualMhsId(parsed[0].id);
+        }
+      }
+    }
+  };
+
+  const handleSaveManualAttendance = async (e) => {
+    e.preventDefault();
+    if (!manualMhsId) {
+      alert('Silakan pilih mahasiswa!');
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from('attendance').insert({
+        mahasiswa_id: manualMhsId,
+        check_in: manualCheckIn,
+        check_out: manualCheckOut,
+        hours: '8h 0m',
+        status: manualStatus,
+        date: manualDate
+      });
+
+      if (error) throw error;
+      await fetchAttendance();
+    } catch (err) {
+      console.warn('DB attendance insert failed, adding locally:', err.message);
+      // Fallback local update
+      const studentObj = students.find(s => s.id === manualMhsId) || { name: 'Emma Johnson', nim: '110202201', department: 'Kelompok 14' };
+      const newRecord = {
+        id: Date.now(),
+        name: studentObj.name,
+        nim: studentObj.nim,
+        group: studentObj.department || studentObj.group || 'Kelompok 14',
+        checkIn: manualCheckIn,
+        checkOut: manualCheckOut,
+        hours: '8h 0m',
+        status: manualStatus,
+        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100'
+      };
+      const updated = [newRecord, ...attendanceData];
+      setAttendanceData(updated);
+      localStorage.setItem('kkn_attendance_cached', JSON.stringify(updated));
+    }
+    setIsAttendanceModalOpen(false);
+  };
+
+  const handleDeleteAttendance = async (id) => {
+    if (confirm('Apakah Anda yakin ingin menghapus catatan kehadiran ini dari database?')) {
+      try {
+        const { error } = await supabase.from('attendance').delete().eq('id', id);
+        if (error) throw error;
+        await fetchAttendance();
+      } catch (err) {
+        console.warn('DB attendance delete failed, deleting locally:', err.message);
+        const updated = attendanceData.filter(item => item.id !== id);
+        setAttendanceData(updated);
+        localStorage.setItem('kkn_attendance_cached', JSON.stringify(updated));
+      }
+    }
+  };
 
   // Open modal for Adding a new agenda
   const handleOpenAddModal = () => {
@@ -487,7 +579,7 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                 </div>
 
                 <div className="toolbar-right">
-                  <button className="btn-add-employee">
+                  <button type="button" className="btn-add-employee" onClick={() => setIsAttendanceModalOpen(true)}>
                     <Plus size={16} />
                     <span>Isi Kehadiran</span>
                   </button>
@@ -539,9 +631,9 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                           </td>
                           <td>
                             <div className="action-buttons-cell">
-                              <button className="action-icon-btn" title="Lihat"><Eye size={15} /></button>
-                              <button className="action-icon-btn" title="Edit"><Edit2 size={14} /></button>
-                              <button className="action-icon-btn delete" title="Hapus"><Trash2 size={14} /></button>
+                              <button type="button" className="action-icon-btn" title="Lihat"><Eye size={15} /></button>
+                              <button type="button" className="action-icon-btn" title="Edit" onClick={() => alert('Untuk merubah status kehadiran silakan gunakan mode manual Isi Kehadiran.')}><Edit2 size={14} /></button>
+                              <button type="button" className="action-icon-btn delete" title="Hapus" onClick={() => handleDeleteAttendance(act.id)}><Trash2 size={14} /></button>
                             </div>
                           </td>
                         </tr>
@@ -1298,6 +1390,129 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
               )}
             </div>
 
+          </div>
+        </div>
+      ) : null}
+
+      {isAttendanceModalOpen ? (
+        <div className="modal-overlay" onClick={() => setIsAttendanceModalOpen(false)}>
+          <div className="modal-container" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
+            
+            <div className="modal-header">
+              <div className="modal-title-group">
+                <div className="modal-icon-badge" style={{ background: 'rgba(59,130,246,0.1)', color: '#3b82f6' }}>
+                  <Users size={20} />
+                </div>
+                <div>
+                  <h3 className="modal-title">Isi Kehadiran Manual</h3>
+                  <p className="modal-subtitle">Catat kehadiran mahasiswa KKN secara manual</p>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                className="modal-close-btn"
+                onClick={() => setIsAttendanceModalOpen(false)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveManualAttendance} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginTop: '1rem' }}>
+              
+              {/* Select Student */}
+              <div className="input-group">
+                <label className="input-label">Pilih Mahasiswa KKN</label>
+                <select 
+                  className="toolbar-select" 
+                  value={manualMhsId} 
+                  onChange={(e) => setManualMhsId(e.target.value)}
+                  style={{ width: '100%', height: '42px', paddingLeft: '0.5rem', background: 'var(--color-admin-bg)' }}
+                  required
+                >
+                  {students.map(s => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} - NIM {s.nim} ({s.department || 'Kelompok'})
+                    </option>
+                  ))}
+                  {students.length === 0 && (
+                    <option value="">Belum ada mahasiswa terdaftar</option>
+                  )}
+                </select>
+              </div>
+
+              {/* Status */}
+              <div className="input-group">
+                <label className="input-label">Status Presensi</label>
+                <select 
+                  className="toolbar-select" 
+                  value={manualStatus} 
+                  onChange={(e) => setManualStatus(e.target.value)}
+                  style={{ width: '100%', height: '42px', paddingLeft: '0.5rem', background: 'var(--color-admin-bg)' }}
+                  required
+                >
+                  <option value="Hadir">Hadir</option>
+                  <option value="Terlambat">Terlambat</option>
+                  <option value="Absen">Absen</option>
+                  <option value="Izin">Izin</option>
+                </select>
+              </div>
+
+              {/* Date */}
+              <div className="input-group">
+                <label className="input-label">Tanggal Presensi</label>
+                <input 
+                  type="date"
+                  className="form-input"
+                  value={manualDate}
+                  onChange={(e) => setManualDate(e.target.value)}
+                  required
+                  style={{ paddingLeft: '0.85rem' }}
+                />
+              </div>
+
+              {/* Check In / Out Row */}
+              <div className="form-row-grid">
+                <div className="input-group">
+                  <label className="input-label">Jam Masuk (Check In)</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    placeholder="Contoh: 08:00 AM" 
+                    value={manualCheckIn}
+                    onChange={(e) => setManualCheckIn(e.target.value)}
+                    required
+                    style={{ paddingLeft: '0.85rem' }}
+                  />
+                </div>
+
+                <div className="input-group">
+                  <label className="input-label">Jam Pulang (Check Out)</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    placeholder="Contoh: 04:00 PM" 
+                    value={manualCheckOut}
+                    onChange={(e) => setManualCheckOut(e.target.value)}
+                    required
+                    style={{ paddingLeft: '0.85rem' }}
+                  />
+                </div>
+              </div>
+
+              {/* Form Actions */}
+              <div className="modal-footer" style={{ padding: '0.5rem 0 0 0' }}>
+                <button 
+                  type="button" 
+                  className="btn-cancel"
+                  onClick={() => setIsAttendanceModalOpen(false)}
+                >
+                  Batal
+                </button>
+                <button type="submit" className="btn-submit-modal" style={{ background: '#3b82f6' }}>
+                  Simpan Presensi
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       ) : null}
