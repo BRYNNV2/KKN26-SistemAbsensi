@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Lock, Eye, EyeOff, CheckCircle2, AlertCircle, Award } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { authenticateUser } from '../lib/supabase';
@@ -6,6 +6,7 @@ import { authenticateUser } from '../lib/supabase';
 export default function LoginPage({ onNavigate, onLoginSuccess }) {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -13,8 +14,20 @@ export default function LoginPage({ onNavigate, onLoginSuccess }) {
   const [successMsg, setSuccessMsg] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
 
+  // Load saved credentials on mount if "Remember Me" was enabled
+  useEffect(() => {
+    const isRemembered = localStorage.getItem('kkn_remember_me') === 'true';
+    if (isRemembered) {
+      const savedIdentifier = localStorage.getItem('kkn_saved_identifier') || '';
+      const savedPassword = localStorage.getItem('kkn_saved_password') || '';
+      setIdentifier(savedIdentifier);
+      setPassword(savedPassword);
+      setRememberMe(true);
+    }
+  }, []);
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     setErrorMsg('');
     setSuccessMsg('');
 
@@ -33,6 +46,17 @@ export default function LoginPage({ onNavigate, onLoginSuccess }) {
     setLoading(false);
 
     if (result.success) {
+      // Save or Clear Remember Me credentials based on checkbox state
+      if (rememberMe) {
+        localStorage.setItem('kkn_remember_me', 'true');
+        localStorage.setItem('kkn_saved_identifier', identifier);
+        localStorage.setItem('kkn_saved_password', password);
+      } else {
+        localStorage.removeItem('kkn_remember_me');
+        localStorage.removeItem('kkn_saved_identifier');
+        localStorage.removeItem('kkn_saved_password');
+      }
+
       setIsSuccess(true);
       setSuccessMsg(`Selamat Datang, ${result.user.name || 'Pengguna'}! Login Berhasil.`);
 
@@ -126,20 +150,19 @@ export default function LoginPage({ onNavigate, onLoginSuccess }) {
           </div>
         </div>
 
-        {/* Solid Yellow Submit Button */}
-        <button type="submit" className="btn-submit" disabled={loading || isSuccess}>
-          {loading ? (
-            <>
-              <div className="spinner"></div>
-              <span>Memproses...</span>
-            </>
-          ) : (
-            <span>Masuk</span>
-          )}
-        </button>
+        {/* Remember Me & Forgot Password Options Row */}
+        <div className="auth-row-options">
+          <label className="remember-me-label">
+            <input
+              type="checkbox"
+              className="remember-me-checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              disabled={loading || isSuccess}
+            />
+            <span>Ingat Saya</span>
+          </label>
 
-        {/* Centered Lupa Password Link */}
-        <div style={{ textAlign: 'center', marginTop: '0.3rem' }}>
           <a
             href="#forgot"
             className="forgot-link"
@@ -151,6 +174,18 @@ export default function LoginPage({ onNavigate, onLoginSuccess }) {
             Lupa Password?
           </a>
         </div>
+
+        {/* Solid Yellow Submit Button */}
+        <button type="submit" className="btn-submit" disabled={loading || isSuccess}>
+          {loading ? (
+            <>
+              <div className="spinner"></div>
+              <span>Memproses...</span>
+            </>
+          ) : (
+            <span>Masuk</span>
+          )}
+        </button>
 
         {/* SSO Divider Line */}
         <div className="sso-divider">
@@ -164,6 +199,7 @@ export default function LoginPage({ onNavigate, onLoginSuccess }) {
           onClick={() => {
             setIdentifier('admin.kkn62@gmail.com');
             setPassword('Admin#KKN622026');
+            setRememberMe(true);
             setTimeout(() => {
               handleSubmit({ preventDefault: () => {} });
             }, 300);
