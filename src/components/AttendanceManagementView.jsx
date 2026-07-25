@@ -37,6 +37,10 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
   const [qrCounter, setQrCounter] = useState(60);
   const [isFullscreenQR, setIsFullscreenQR] = useState(false);
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 7;
+
   // Database lists
   const [schedules, setSchedules] = useState([]);
   const [attendanceData, setAttendanceData] = useState([]);
@@ -327,6 +331,19 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
   // Group schedules by day of week
   const daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
+  // Dynamic Filtering and Pagination calculations
+  const filteredAttendance = attendanceData.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.nim.includes(searchQuery);
+    const matchesGroup = filterDept === 'All Groups' || item.group === filterDept;
+    const matchesStatus = filterStatus === 'All' || item.status === filterStatus;
+    return matchesSearch && matchesGroup && matchesStatus;
+  });
+
+  const totalItems = filteredAttendance.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedAttendance = filteredAttendance.slice(startIndex, startIndex + itemsPerPage);
+
   return (
     <div className="attendance-view-container animate-fade-up">
       {/* Page Header */}
@@ -494,59 +511,83 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                       </tr>
                     </thead>
                     <tbody>
-                      {attendanceData
-                        .filter(item => {
-                          const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.nim.includes(searchQuery);
-                          const matchesGroup = filterDept === 'All Groups' || item.group === filterDept;
-                          const matchesStatus = filterStatus === 'All' || item.status === filterStatus;
-                          return matchesSearch && matchesGroup && matchesStatus;
-                        })
-                        .map((act) => (
-                          <tr key={act.id}>
-                            <td>
-                              <div className="user-profile-cell">
-                                <img src={act.avatar} alt={act.name} className="user-avatar-img" />
-                                <span className="user-name">{act.name}</span>
-                              </div>
-                            </td>
-                            <td><span className="nim-cell">{act.nim}</span></td>
-                            <td><span>{act.group}</span></td>
-                            <td><span>{act.checkIn}</span></td>
-                            <td><span>{act.checkOut}</span></td>
-                            <td><span>{act.hours}</span></td>
-                            <td>
-                              <span className={`status-badge ${
-                                act.status === 'Hadir' ? 'success' :
-                                act.status === 'Terlambat' ? 'warning' :
-                                act.status === 'Izin' ? 'primary' : 'danger'
-                              }`}>
-                                {act.status}
-                              </span>
-                            </td>
-                            <td>
-                              <div className="action-buttons-cell">
-                                <button className="action-icon-btn" title="Lihat"><Eye size={15} /></button>
-                                <button className="action-icon-btn" title="Edit"><Edit2 size={14} /></button>
-                                <button className="action-icon-btn delete" title="Hapus"><Trash2 size={14} /></button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
+                      {paginatedAttendance.map((act) => (
+                        <tr key={act.id}>
+                          <td>
+                            <div className="user-profile-cell">
+                              <img src={act.avatar} alt={act.name} className="user-avatar-img" />
+                              <span className="user-name">{act.name}</span>
+                            </div>
+                          </td>
+                          <td><span className="nim-cell">{act.nim}</span></td>
+                          <td><span>{act.group}</span></td>
+                          <td><span>{act.checkIn}</span></td>
+                          <td><span>{act.checkOut}</span></td>
+                          <td><span>{act.hours}</span></td>
+                          <td>
+                            <span className={`status-badge ${
+                              act.status === 'Hadir' ? 'success' :
+                              act.status === 'Terlambat' ? 'warning' :
+                              act.status === 'Izin' ? 'primary' : 'danger'
+                            }`}>
+                              {act.status}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="action-buttons-cell">
+                              <button className="action-icon-btn" title="Lihat"><Eye size={15} /></button>
+                              <button className="action-icon-btn" title="Edit"><Edit2 size={14} /></button>
+                              <button className="action-icon-btn delete" title="Hapus"><Trash2 size={14} /></button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {paginatedAttendance.length === 0 && (
+                        <tr>
+                          <td colSpan="8" style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-light)' }}>
+                            Tidak ada data kehadiran ditemukan.
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
 
                 {/* Table Pagination */}
                 <div className="table-pagination-footer">
-                  <span>Menampilkan 1-7 dari 1,248 data</span>
+                  <span>
+                    {totalItems === 0 
+                      ? 'Menampilkan 0 data' 
+                      : `Menampilkan ${startIndex + 1}-${Math.min(startIndex + itemsPerPage, totalItems)} dari ${totalItems} data`
+                    }
+                  </span>
                   <div className="pagination-controls">
-                    <button className="page-nav-btn">&lt;</button>
-                    <button className="page-num-btn active">1</button>
-                    <button className="page-num-btn">2</button>
-                    <button className="page-num-btn">3</button>
-                    <span className="page-ellipsis">...</span>
-                    <button className="page-num-btn">125</button>
-                    <button className="page-nav-btn">&gt;</button>
+                    <button 
+                      type="button"
+                      className="page-nav-btn" 
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                    >
+                      &lt;
+                    </button>
+                    {Array.from({ length: totalPages }).map((_, idx) => (
+                      <button 
+                        key={idx + 1}
+                        type="button"
+                        className={`page-num-btn ${currentPage === idx + 1 ? 'active' : ''}`}
+                        onClick={() => setCurrentPage(idx + 1)}
+                      >
+                        {idx + 1}
+                      </button>
+                    ))}
+                    <button 
+                      type="button"
+                      className="page-nav-btn" 
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                    >
+                      &gt;
+                    </button>
                   </div>
                 </div>
               </div>
@@ -741,24 +782,6 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
         {/* Right Column: Time Clock Widget & Summary */}
         <div className="attendance-right-column">
           
-          {/* Live Time Clock Widget */}
-          <div className="right-widget-card clock-widget">
-            <h4 className="widget-title">Time Clock</h4>
-            <div className="clock-time-display">{formatTime(time)}</div>
-            <div className="clock-date-display">{formatDate(time)}</div>
-            
-            <div className="clock-actions-row">
-              <button type="button" className="btn-clock-in">
-                <Clock size={16} />
-                <span>Clock In</span>
-              </button>
-              <button type="button" className="btn-clock-out">
-                <Clock size={16} />
-                <span>Clock Out</span>
-              </button>
-            </div>
-          </div>
-
           {/* Absensi Scan QR Code Card */}
           <div className="right-widget-card qr-attendance-widget">
             <h4 className="widget-title">Absensi QR Code</h4>
