@@ -715,17 +715,13 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                         setSessionTitle(`Presensi KKN - Tanggal ${new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}`);
                         setIsSessionModalOpen(true);
                       }} 
-                      style={{ background: '#0f172a', borderColor: '#0f172a', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
                     >
                       <PlusCircle size={16} />
-                      <span>Buka Sesi QR Broadcast</span>
+                      <span>Buka Sesi Absen QR</span>
                     </button>
                   )}
                   
-                  <button type="button" className="btn-add-employee" onClick={() => setIsAttendanceModalOpen(true)}>
-                    <Plus size={16} />
-                    <span>Isi Kehadiran</span>
-                  </button>
                   <button className="tab-filter-btn" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                     <Download size={15} />
                     <span>Ekspor CSV</span>
