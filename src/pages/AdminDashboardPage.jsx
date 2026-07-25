@@ -14,7 +14,7 @@ import MiniCalendar from '../components/MiniCalendar';
 import MahasiswaManagementView from '../components/MahasiswaManagementView';
 import AttendanceManagementView from '../components/AttendanceManagementView';
 
-export default function AdminDashboardPage({ user, onLogout }) {
+export default function AdminDashboardPage({ user, onLogout, onSwitchRole }) {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem('kkn_theme') || 'light');
@@ -130,6 +130,7 @@ export default function AdminDashboardPage({ user, onLogout }) {
               onLogout={onLogout} 
               theme={theme}
               onToggleTheme={handleToggleTheme}
+              onSwitchRole={onSwitchRole}
             />
 
             {/* Dashboard Body Grid */}

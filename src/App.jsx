@@ -3,10 +3,12 @@ import gsap from 'gsap';
 import LoginPage from './pages/LoginPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import MahasiswaDashboardPage from './pages/MahasiswaDashboardPage';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('login'); // 'login', 'forgot-password', 'dashboard'
   const [currentUser, setCurrentUser] = useState(null);
+  const [viewMode, setViewMode] = useState('admin'); // 'admin' or 'mahasiswa'
   const cardContainerRef = useRef(null);
 
   const handleNavigate = (newPage) => {
@@ -35,6 +37,12 @@ export default function App() {
   // Called when user completes authentication
   const handleLoginSuccess = (userObj) => {
     setCurrentUser(userObj);
+    // Auto set viewMode based on user role if available
+    if (userObj?.role === 'student' || userObj?.role === 'mahasiswa') {
+      setViewMode('mahasiswa');
+    } else {
+      setViewMode('admin');
+    }
     handleNavigate('dashboard');
   };
 
@@ -44,12 +52,27 @@ export default function App() {
     handleNavigate('login');
   };
 
-  // Render Admin Dashboard Page when authenticated
+  const toggleViewMode = () => {
+    setViewMode(prev => (prev === 'admin' ? 'mahasiswa' : 'admin'));
+  };
+
+  // Render Dashboard Page when authenticated
   if (currentPage === 'dashboard') {
+    if (viewMode === 'mahasiswa') {
+      return (
+        <MahasiswaDashboardPage 
+          user={currentUser} 
+          onLogout={handleLogout} 
+          onSwitchRole={toggleViewMode}
+        />
+      );
+    }
+
     return (
       <AdminDashboardPage 
         user={currentUser} 
         onLogout={handleLogout} 
+        onSwitchRole={toggleViewMode}
       />
     );
   }
