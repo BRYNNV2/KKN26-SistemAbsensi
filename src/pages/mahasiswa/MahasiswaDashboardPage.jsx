@@ -18,7 +18,9 @@ import {
   Check, 
   LogOut,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  AlertTriangle,
+  Info
 } from 'lucide-react';
 import MahasiswaSidebar from '../../components/mahasiswa/MahasiswaSidebar';
 import MahasiswaTopbar from '../../components/mahasiswa/MahasiswaTopbar';
@@ -67,12 +69,17 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
   ]);
   const [logbookSubmitSuccess, setLogbookSubmitSuccess] = useState(false);
 
+  // Determine current day & active schedule added by Dosen
+  const currentDayIndonesian = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][new Date().getDay()];
+  const todayActiveSchedule = schedules.find(s => s.day === currentDayIndonesian);
+  const isScheduleInputtedByDosen = Boolean(todayActiveSchedule);
+
   // Stats
-  const totalHadir = myAttendanceLogs.filter(a => a.status === 'Hadir').length || 14;
-  const totalTerlambat = myAttendanceLogs.filter(a => a.status === 'Terlambat').length || 1;
+  const totalHadir = myAttendanceLogs.filter(a => a.status === 'Hadir').length || 0;
+  const totalTerlambat = myAttendanceLogs.filter(a => a.status === 'Terlambat').length || 0;
   const totalIzin = myAttendanceLogs.filter(a => a.status === 'Izin').length || 0;
   const totalPertemuan = totalHadir + totalTerlambat + totalIzin;
-  const percentKehadiran = totalPertemuan > 0 ? Math.round((totalHadir / totalPertemuan) * 100) : 96;
+  const percentKehadiran = totalPertemuan > 0 ? Math.round((totalHadir / totalPertemuan) * 100) : 100;
 
   // Fetch Live Data on mount
   useEffect(() => {
@@ -84,24 +91,16 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
     try {
       const { data, error } = await supabase.from('schedules').select('*').order('id', { ascending: true });
       if (error) throw error;
-      if (data && data.length > 0) {
+      if (data) {
         setSchedules(data);
-      } else {
-        useDefaultSchedules();
       }
     } catch (err) {
-      console.warn('Failed to load schedules, using cache/defaults:', err.message);
-      useDefaultSchedules();
+      console.warn('Failed to load schedules from Supabase:', err.message);
+      const cached = localStorage.getItem('kkn_schedules_cached');
+      if (cached) {
+        setSchedules(JSON.parse(cached));
+      }
     }
-  };
-
-  const useDefaultSchedules = () => {
-    const defaultData = [
-      { id: 1, day: 'Senin', title: 'Supervisi Lapangan Wilayah Posko 14', code: 'SPV1101', timeStart: '08:00', timeEnd: '10:30', group: 'Kelompok 14', location: 'Balai Desa Sukamaju' },
-      { id: 2, day: 'Rabu', title: 'Penyusunan Program Kerja Unggulan KKN', code: 'PRG1102', timeStart: '13:00', timeEnd: '15:30', group: 'Kelompok 14', location: 'Posko Serumpun' },
-      { id: 3, day: 'Jumat', title: 'Sosialisasi Digitalisasi UMKM Desa', code: 'UMK1103', timeStart: '09:00', timeEnd: '11:30', group: 'Semua Kelompok', location: 'Aula Kecamatan' }
-    ];
-    setSchedules(defaultData);
   };
 
   const fetchMyAttendance = async () => {
@@ -129,6 +128,11 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
 
   // Perform Check In / Check Out action
   const handlePerformAttendance = async () => {
+    if (!isScheduleInputtedByDosen) {
+      alert('Jadwal presensi belum diinput oleh Dosen DPL untuk hari ini. Silakan hubungi Dosen DPL.');
+      return;
+    }
+
     const now = new Date();
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const dateStr = now.toLocaleDateString('id-ID');
@@ -207,6 +211,11 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
 
   // Handle Simulated QR Scan
   const handleScanQrAction = () => {
+    if (!isScheduleInputtedByDosen) {
+      alert('Jadwal presensi belum diinput oleh Dosen DPL untuk hari ini. QR Code presensi belum dapat dipindai.');
+      return;
+    }
+
     setShowQrModal(true);
     setQrScanning(true);
     setQrSuccess(false);
@@ -244,31 +253,32 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
           {activeTab === 'dashboard' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
               
-              {/* Header Hero Banner */}
+              {/* Header Hero Banner (Clean Elegant Style) */}
               <div style={{
-                background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%)',
-                borderRadius: '16px',
-                padding: '2rem',
-                boxShadow: '0 4px 20px rgba(37, 99, 235, 0.15)',
-                color: '#ffffff'
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderLeft: '5px solid #0f172a',
+                borderRadius: '12px',
+                padding: '1.75rem',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                   <div>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255, 255, 255, 0.15)', color: '#ffffff', padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.75rem' }}>
-                      <Sparkles size={14} />
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#f1f5f9', color: '#334155', padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.75rem', border: '1px solid #e2e8f0' }}>
+                      <Sparkles size={14} style={{ color: '#2563eb' }} />
                       <span>PORTAL AKADEMIK MAHASISWA KKN62</span>
                     </div>
-                    <h2 style={{ fontSize: '1.75rem', fontWeight: 800, margin: 0 }}>
+                    <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
                       Selamat Datang, {user?.name || 'Budi Pratama'}! 👋
                     </h2>
-                    <p style={{ color: '#dbeafe', fontSize: '0.9rem', margin: '0.4rem 0 0 0' }}>
+                    <p style={{ color: '#475569', fontSize: '0.88rem', margin: '0.4rem 0 0 0' }}>
                       NIM: {user?.nim || '21081010045'} • Kelompok 14 (Desa Sukamaju, Kecamatan Serumpun)
                     </p>
                   </div>
 
-                  <div style={{ background: 'rgba(255, 255, 255, 0.12)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px', padding: '1rem 1.25rem', textAlign: 'right' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#dbeafe' }}>Dosen Pembimbing Lapangan (DPL):</div>
-                    <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#ffffff', marginTop: '2px' }}>
+                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1rem 1.25rem', textAlign: 'right' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Dosen Pembimbing Lapangan (DPL):</div>
+                    <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
                       Dr. Ir. Hendra Wijaya, M.T.
                     </div>
                   </div>
@@ -312,7 +322,7 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                 </div>
 
                 <div className="kpi-card purple" style={{ background: '#ffffff', border: '1px solid #e2e8f0', padding: '1.25rem', borderRadius: '12px' }}>
-                  <div className="kpi-icon-wrapper purple" style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#f3e8ff', color: '#9333ea', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div className="kpi-icon-wrapper purple" style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#f8fafc', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Percent size={20} />
                   </div>
                   <div className="kpi-details" style={{ marginTop: '0.75rem' }}>
@@ -328,11 +338,11 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
               <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.75rem' }}>
                 
                 {/* Left Card: Live Presence Action */}
-                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#f1f5f9', color: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <Clock size={20} />
                         </div>
                         <div>
@@ -348,13 +358,33 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                         fontWeight: 700, 
                         padding: '0.3rem 0.75rem', 
                         borderRadius: '20px',
-                        background: isCheckedIn ? '#dcfce7' : '#fef3c7',
-                        color: isCheckedIn ? '#166534' : '#92400e',
-                        border: isCheckedIn ? '1px solid #bbf7d0' : '1px solid #fde68a'
+                        background: !isScheduleInputtedByDosen ? '#f1f5f9' : (isCheckedIn ? '#dcfce7' : '#fef3c7'),
+                        color: !isScheduleInputtedByDosen ? '#64748b' : (isCheckedIn ? '#166534' : '#92400e'),
+                        border: !isScheduleInputtedByDosen ? '1px solid #cbd5e1' : (isCheckedIn ? '1px solid #bbf7d0' : '1px solid #fde68a')
                       }}>
-                        {isCheckedIn ? '● SUDAH ABSEN' : '○ BELUM ABSEN'}
+                        {!isScheduleInputtedByDosen ? 'SESI BELUM DIBUKA' : (isCheckedIn ? '● SUDAH ABSEN' : '○ BELUM ABSEN')}
                       </span>
                     </div>
+
+                    {/* Dosen Schedule Status Notification */}
+                    {!isScheduleInputtedByDosen ? (
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem', textAlign: 'center', marginBottom: '1.5rem' }}>
+                        <AlertTriangle size={24} style={{ color: '#d97706', margin: '0 auto 0.5rem auto' }} />
+                        <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.35rem 0' }}>
+                          Belum Ada Jadwal Presensi Aktif Hari Ini ({currentDayIndonesian})
+                        </h4>
+                        <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+                          Dosen DPL / Admin KKN belum menginput jadwal presensi kegiatan untuk hari ini.<br />
+                          Tombol presensi dan scan QR akan otomatis aktif setelah Dosen menambahkan jadwal.
+                        </p>
+                      </div>
+                    ) : (
+                      <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '1rem', textAlign: 'center', marginBottom: '1.5rem' }}>
+                        <span style={{ fontSize: '0.78rem', color: '#166534', fontWeight: 700 }}>
+                          ✓ Sesi Presensi Aktif: {todayActiveSchedule?.title} ({todayActiveSchedule?.timeStart} - {todayActiveSchedule?.timeEnd})
+                        </span>
+                      </div>
+                    )}
 
                     {/* Check In / Out Time Status Details */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
@@ -378,23 +408,24 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                     <button
                       onClick={handlePerformAttendance}
+                      disabled={!isScheduleInputtedByDosen}
                       style={{
                         width: '100%',
                         padding: '0.85rem',
-                        borderRadius: '10px',
+                        borderRadius: '8px',
                         border: 'none',
-                        background: isCheckedIn 
-                          ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
-                          : 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
-                        color: '#ffffff',
-                        fontSize: '0.92rem',
+                        background: !isScheduleInputtedByDosen 
+                          ? '#e2e8f0'
+                          : (isCheckedIn ? '#0f172a' : '#16a34a'),
+                        color: !isScheduleInputtedByDosen ? '#94a3b8' : '#ffffff',
+                        fontSize: '0.9rem',
                         fontWeight: 700,
-                        cursor: 'pointer',
+                        cursor: !isScheduleInputtedByDosen ? 'not-allowed' : 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: '0.6rem',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                        boxShadow: isScheduleInputtedByDosen ? '0 2px 8px rgba(0,0,0,0.1)' : 'none'
                       }}
                     >
                       <CheckCircle2 size={19} />
@@ -403,36 +434,37 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
 
                     <button
                       onClick={handleScanQrAction}
+                      disabled={!isScheduleInputtedByDosen}
                       style={{
                         width: '100%',
                         padding: '0.75rem',
-                        borderRadius: '10px',
-                        border: '1px solid #cbd5e1',
-                        background: '#ffffff',
-                        color: '#1e293b',
+                        borderRadius: '8px',
+                        border: !isScheduleInputtedByDosen ? '1px solid #e2e8f0' : '1px solid #cbd5e1',
+                        background: !isScheduleInputtedByDosen ? '#f8fafc' : '#ffffff',
+                        color: !isScheduleInputtedByDosen ? '#cbd5e1' : '#0f172a',
                         fontSize: '0.85rem',
                         fontWeight: 700,
-                        cursor: 'pointer',
+                        cursor: !isScheduleInputtedByDosen ? 'not-allowed' : 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: '0.5rem'
                       }}
                     >
-                      <QrCode size={18} style={{ color: '#2563eb' }} />
+                      <QrCode size={18} style={{ color: isScheduleInputtedByDosen ? '#0f172a' : '#cbd5e1' }} />
                       <span>Pindai Kode QR Posko KKN</span>
                     </button>
                   </div>
                 </div>
 
                 {/* Right Column: Weekly Schedules Summary */}
-                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                   <div style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem', marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                      <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Jadwal KKN Pekan Ini</h3>
-                      <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Agenda kegiatan & supervisi posko</span>
+                      <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Jadwal KKN Diinput Dosen</h3>
+                      <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Agenda kegiatan & supervisi resmi posko</span>
                     </div>
-                    <span style={{ fontSize: '0.75rem', color: '#2563eb', background: '#eff6ff', padding: '0.3rem 0.65rem', borderRadius: '12px', fontWeight: 700 }}>
+                    <span style={{ fontSize: '0.75rem', color: '#334155', background: '#f1f5f9', padding: '0.3rem 0.65rem', borderRadius: '12px', fontWeight: 700, border: '1px solid #e2e8f0' }}>
                       {schedules.length} Agenda
                     </span>
                   </div>
@@ -445,20 +477,25 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                         style={{
                           background: '#f8fafc',
                           border: '1px solid #e2e8f0',
-                          borderRadius: '10px',
+                          borderRadius: '8px',
                           padding: '1rem',
                           cursor: 'pointer',
                           transition: 'all 0.2s ease'
                         }}
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#2563eb' }}>{sc.day} ({sc.timeStart} - {sc.timeEnd})</span>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a' }}>{sc.day} ({sc.timeStart} - {sc.timeEnd})</span>
                           <ChevronRight size={15} style={{ color: '#94a3b8' }} />
                         </div>
                         <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.25rem 0' }}>{sc.title}</h4>
                         <span style={{ fontSize: '0.78rem', color: '#64748b' }}>📍 {sc.location}</span>
                       </div>
                     ))}
+                    {schedules.length === 0 && (
+                      <div style={{ textAlign: 'center', padding: '2rem 1rem', color: '#94a3b8', fontSize: '0.85rem' }}>
+                        Belum ada jadwal yang diinput oleh Dosen DPL.
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -471,14 +508,14 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
           {activeTab === 'logbook' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
               
-              <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+              <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                 <div style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
                   <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Input Logbook Harian KKN</h2>
                   <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>Laporkan rincian kegiatan KKN yang telah dilakukan hari ini untuk diverifikasi DPL.</p>
                 </div>
 
                 {logbookSubmitSuccess && (
-                  <div style={{ background: '#dcfce7', border: '1px solid #bbf7d0', color: '#166534', padding: '0.85rem 1rem', borderRadius: '8px', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+                  <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534', padding: '0.85rem 1rem', borderRadius: '8px', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
                     <CheckCircle2 size={18} />
                     <span>Logbook harian Anda berhasil dikirim ke sistem DPL!</span>
                   </div>
@@ -493,7 +530,7 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                         type="date"
                         value={logbookDate}
                         onChange={(e) => setLogbookDate(e.target.value)}
-                        style={{ width: '100%', padding: '0.7rem 0.9rem', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', color: '#0f172a', fontSize: '0.85rem', outline: 'none' }}
+                        style={{ width: '100%', padding: '0.7rem 0.9rem', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', color: '#0f172a', fontSize: '0.85rem', outline: 'none' }}
                         required
                       />
                     </div>
@@ -505,7 +542,7 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                         placeholder="Contoh: Pemetaan UMKM dan Penyuluhan Kebersihan Desa"
                         value={logbookTitle}
                         onChange={(e) => setLogbookTitle(e.target.value)}
-                        style={{ width: '100%', padding: '0.7rem 0.9rem', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', color: '#0f172a', fontSize: '0.85rem', outline: 'none' }}
+                        style={{ width: '100%', padding: '0.7rem 0.9rem', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', color: '#0f172a', fontSize: '0.85rem', outline: 'none' }}
                         required
                       />
                     </div>
@@ -518,7 +555,7 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                       placeholder="Jelaskan secara singkat proses kegiatan, pihak yang terlibat, dan hasil akhir kerja lapangan..."
                       value={logbookDesc}
                       onChange={(e) => setLogbookDesc(e.target.value)}
-                      style={{ width: '100%', padding: '0.75rem 0.9rem', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', color: '#0f172a', fontSize: '0.85rem', outline: 'none', fontFamily: 'inherit' }}
+                      style={{ width: '100%', padding: '0.75rem 0.9rem', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', color: '#0f172a', fontSize: '0.85rem', outline: 'none', fontFamily: 'inherit' }}
                       required
                     />
                   </div>
@@ -526,7 +563,7 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                   <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <button 
                       type="submit"
-                      style={{ padding: '0.75rem 1.75rem', background: '#2563eb', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 2px 8px rgba(37,99,235,0.2)' }}
+                      style={{ padding: '0.75rem 1.75rem', background: '#0f172a', color: '#ffffff', border: 'none', borderRadius: '6px', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                     >
                       <Send size={16} />
                       <span>Kirim Laporan Logbook</span>
@@ -536,11 +573,11 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
               </div>
 
               {/* History of Submitted Logbooks */}
-              <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+              <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                 <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', marginBottom: '1.25rem' }}>Riwayat Logbook Terkirim</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   {logbooksList.map((lb) => (
-                    <div key={lb.id} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem' }}>
+                    <div key={lb.id} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                         <span style={{ fontSize: '0.78rem', color: '#64748b' }}>📅 {lb.date}</span>
                         <span style={{ fontSize: '0.75rem', color: '#166534', background: '#dcfce7', padding: '0.2rem 0.6rem', borderRadius: '4px', fontWeight: 600 }}>
@@ -559,7 +596,7 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
 
           {/* TAB 3: RIWAYAT KEHADIRAN */}
           {(activeTab === 'history' || activeTab === 'schedules') && (
-            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
               <div style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
                 <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Riwayat Kehadiran KKN Saya</h2>
                 <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Daftar log presensi masuk dan keluar yang tercatat di database</span>
@@ -612,31 +649,31 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
 
           {/* TAB 4: PENGATURAN AKUN */}
           {activeTab === 'settings' && (
-            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '1.75rem', maxWidth: '600px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+            <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.75rem', maxWidth: '600px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', marginBottom: '1.25rem' }}>Pengaturan Profil Mahasiswa</h2>
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 <div>
                   <label style={{ fontSize: '0.8rem', color: '#64748b', display: 'block', marginBottom: '0.3rem', fontWeight: 600 }}>Nama Lengkap</label>
-                  <input type="text" value={user?.name || 'Budi Pratama'} readOnly style={{ width: '100%', padding: '0.7rem 0.9rem', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '8px', color: '#0f172a' }} />
+                  <input type="text" value={user?.name || 'Budi Pratama'} readOnly style={{ width: '100%', padding: '0.7rem 0.9rem', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '6px', color: '#0f172a' }} />
                 </div>
 
                 <div>
                   <label style={{ fontSize: '0.8rem', color: '#64748b', display: 'block', marginBottom: '0.3rem', fontWeight: 600 }}>NIM Mahasiswa</label>
-                  <input type="text" value={user?.nim || '21081010045'} readOnly style={{ width: '100%', padding: '0.7rem 0.9rem', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '8px', color: '#0f172a' }} />
+                  <input type="text" value={user?.nim || '21081010045'} readOnly style={{ width: '100%', padding: '0.7rem 0.9rem', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '6px', color: '#0f172a' }} />
                 </div>
 
                 <div>
                   <label style={{ fontSize: '0.8rem', color: '#64748b', display: 'block', marginBottom: '0.3rem', fontWeight: 600 }}>Kelompok KKN</label>
-                  <input type="text" value="Kelompok 14 - Desa Sukamaju" readOnly style={{ width: '100%', padding: '0.7rem 0.9rem', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '8px', color: '#0f172a' }} />
+                  <input type="text" value="Kelompok 14 - Desa Sukamaju" readOnly style={{ width: '100%', padding: '0.7rem 0.9rem', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '6px', color: '#0f172a' }} />
                 </div>
 
                 <div>
                   <label style={{ fontSize: '0.8rem', color: '#64748b', display: 'block', marginBottom: '0.3rem', fontWeight: 600 }}>Perbarui Kata Sandi</label>
-                  <input type="password" placeholder="Masukkan password baru..." style={{ width: '100%', padding: '0.7rem 0.9rem', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', color: '#0f172a' }} />
+                  <input type="password" placeholder="Masukkan password baru..." style={{ width: '100%', padding: '0.7rem 0.9rem', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', color: '#0f172a' }} />
                 </div>
 
-                <button onClick={() => alert('Profil berhasil diperbarui!')} style={{ padding: '0.75rem', background: '#2563eb', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', marginTop: '0.5rem' }}>
+                <button onClick={() => alert('Profil berhasil diperbarui!')} style={{ padding: '0.75rem', background: '#0f172a', color: '#ffffff', border: 'none', borderRadius: '6px', fontWeight: 700, cursor: 'pointer', marginTop: '0.5rem' }}>
                   Simpan Perubahan
                 </button>
               </div>
@@ -680,8 +717,8 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                     padding: '1rem 1.25rem',
                     background: 'transparent',
                     border: 'none',
-                    color: detailsTab === t.id ? '#2563eb' : '#64748b',
-                    borderBottom: detailsTab === t.id ? '3px solid #2563eb' : '3px solid transparent',
+                    color: detailsTab === t.id ? '#0f172a' : '#64748b',
+                    borderBottom: detailsTab === t.id ? '3px solid #0f172a' : '3px solid transparent',
                     cursor: 'pointer',
                     fontSize: '0.85rem',
                     fontWeight: detailsTab === t.id ? 700 : 500
@@ -695,18 +732,17 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
             {/* Content Area */}
             <div style={{ padding: '1.5rem' }}>
               <div style={{
-                background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)',
+                background: '#0f172a',
                 borderRadius: '8px',
                 padding: '2rem 1.5rem',
                 color: '#ffffff',
-                marginBottom: '1.5rem',
-                boxShadow: '0 4px 20px rgba(37, 99, 235, 0.2)'
+                marginBottom: '1.5rem'
               }}>
                 <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0' }}>
                   {selectedSchedule.code || 'KKN62'} - {selectedSchedule.title}
                 </h2>
                 
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', fontSize: '0.85rem', color: '#dbeafe', marginTop: '1rem' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', fontSize: '0.85rem', color: '#cbd5e1', marginTop: '1rem' }}>
                   <span>📅 {selectedSchedule.day}</span>
                   <span>⏰ {selectedSchedule.timeStart} - {selectedSchedule.timeEnd}</span>
                   <span>📍 {selectedSchedule.location}</span>
@@ -739,8 +775,8 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
 
             {qrScanning ? (
               <div style={{ padding: '2rem 1rem' }}>
-                <div className="spinner" style={{ width: '48px', height: '48px', margin: '0 auto 1.25rem auto', borderColor: '#2563eb', borderTopColor: 'transparent' }} />
-                <p style={{ color: '#2563eb', fontWeight: 700, fontSize: '0.95rem' }}>Memindai Kode QR Posko...</p>
+                <div className="spinner" style={{ width: '48px', height: '48px', margin: '0 auto 1.25rem auto', borderColor: '#0f172a', borderTopColor: 'transparent' }} />
+                <p style={{ color: '#0f172a', fontWeight: 700, fontSize: '0.95rem' }}>Memindai Kode QR Posko...</p>
                 <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Arahkan kamera smartphone ke QR Code Jadwal</span>
               </div>
             ) : qrSuccess ? (
@@ -750,7 +786,7 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                 </div>
                 <h4 style={{ color: '#0f172a', margin: '0 0 0.5rem 0' }}>Presensi QR Berhasil!</h4>
                 <p style={{ color: '#64748b', fontSize: '0.82rem' }}>Log kehadiran Anda telah berhasil diverifikasi oleh sistem.</p>
-                <button onClick={() => setShowQrModal(false)} style={{ marginTop: '1rem', padding: '0.6rem 1.5rem', background: '#2563eb', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 700, cursor: 'pointer' }}>
+                <button onClick={() => setShowQrModal(false)} style={{ marginTop: '1rem', padding: '0.6rem 1.5rem', background: '#0f172a', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 700, cursor: 'pointer' }}>
                   Selesai
                 </button>
               </div>
