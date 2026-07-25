@@ -42,6 +42,9 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
   const [selectedSchedule, setSelectedSchedule] = useState(null);
   const [detailsTab, setDetailsTab] = useState('jurnal');
 
+  // Broadcast QR Session State
+  const [activeSession, setActiveSession] = useState(null);
+
   // QR Modal State
   const [showQrModal, setShowQrModal] = useState(false);
   const [qrScanning, setQrScanning] = useState(false);
@@ -72,7 +75,9 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
   // Determine current day & active schedule added by Dosen
   const currentDayIndonesian = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][new Date().getDay()];
   const todayActiveSchedule = schedules.find(s => s.day === currentDayIndonesian);
-  const isScheduleInputtedByDosen = Boolean(todayActiveSchedule);
+  
+  // Enforce Dosen active session requirement instead of just schedule input
+  const isScheduleInputtedByDosen = Boolean(activeSession);
 
   // Stats
   const totalHadir = myAttendanceLogs.filter(a => a.status === 'Hadir').length || 0;
@@ -81,10 +86,58 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
   const totalPertemuan = totalHadir + totalTerlambat + totalIzin;
   const percentKehadiran = totalPertemuan > 0 ? Math.round((totalHadir / totalPertemuan) * 100) : 100;
 
-  // Fetch Live Data on mount
+  const checkActiveSession = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('sesi_presensi')
+        .select('*')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setActiveSession(data[0]);
+      } else {
+        const cached = localStorage.getItem('kkn_active_session');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed.status === 'active') {
+            setActiveSession(parsed);
+          } else {
+            setActiveSession(null);
+          }
+        } else {
+          setActiveSession(null);
+        }
+      }
+    } catch (err) {
+      const cached = localStorage.getItem('kkn_active_session');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.status === 'active') {
+          setActiveSession(parsed);
+        } else {
+          setActiveSession(null);
+        }
+      } else {
+        setActiveSession(null);
+      }
+    }
+  };
+
+  // Fetch Live Data on mount and poll active sessions
   useEffect(() => {
     fetchSchedules();
     fetchMyAttendance();
+    checkActiveSession();
+
+    // Poll active session status every 3 seconds
+    const interval = setInterval(() => {
+      checkActiveSession();
+      fetchMyAttendance();
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const fetchSchedules = async () => {
@@ -104,8 +157,14 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
   };
 
   const fetchMyAttendance = async () => {
+    if (!user?.id) return;
     try {
-      const { data, error } = await supabase.from('attendance').select('*').order('id', { ascending: false });
+      const { data, error } = await supabase
+        .from('attendance')
+        .select('*')
+        .eq('mahasiswa_id', user.id)
+        .order('id', { ascending: false });
+
       if (error) throw error;
       if (data) {
         setMyAttendanceLogs(data);
@@ -115,21 +174,35 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
           setIsCheckedIn(true);
           setCheckInTime(todayRecord.check_in || '08:15 AM');
           setCheckOutTime(todayRecord.check_out || '');
+        } else {
+          setIsCheckedIn(false);
+          setCheckInTime('');
+          setCheckOutTime('');
         }
       }
     } catch (err) {
       console.warn('DB attendance fetch failed:', err.message);
       const cached = localStorage.getItem('kkn_attendance_cached');
       if (cached) {
-        setMyAttendanceLogs(JSON.parse(cached));
+        const allLogs = JSON.parse(cached);
+        const filtered = allLogs.filter(log => log.mahasiswa_id === user.id || log.nim === user.nim);
+        setMyAttendanceLogs(filtered);
+        const todayStr = new Date().toLocaleDateString('id-ID');
+        const todayRecord = filtered.find(d => d.date === todayStr);
+        if (todayRecord) {
+          setIsCheckedIn(true);
+          setCheckInTime(todayRecord.check_in || todayRecord.checkIn || '08:15 AM');
+        } else {
+          setIsCheckedIn(false);
+        }
       }
     }
   };
 
   // Perform Single Attendance Record action
   const handlePerformAttendance = async () => {
-    if (!isScheduleInputtedByDosen) {
-      alert('Jadwal presensi belum diinput oleh Dosen DPL untuk hari ini. Silakan hubungi Dosen DPL.');
+    if (!activeSession) {
+      alert('Sesi presensi belum dibuka oleh Dosen DPL untuk hari ini.');
       return;
     }
 
@@ -147,6 +220,7 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
 
     const newLog = {
       id: Date.now(),
+      mahasiswa_id: user?.id,
       name: user?.name || '-',
       nim: user?.nim || '-',
       group: user?.kelompok || '-',
@@ -158,17 +232,37 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
     const updated = [newLog, ...myAttendanceLogs];
     setMyAttendanceLogs(updated);
 
+    // Save to local cache of all logs too
     try {
-      await supabase.from('attendance').insert({
+      const cached = localStorage.getItem('kkn_attendance_cached');
+      const allLogs = cached ? JSON.parse(cached) : [];
+      localStorage.setItem('kkn_attendance_cached', JSON.stringify([newLog, ...allLogs]));
+    } catch (err) {
+      console.warn(err);
+    }
+
+    try {
+      // Create session id if available
+      const insertData = {
         mahasiswa_id: user?.id || 'mhs-1',
         check_in: timeStr,
         hours: 'Hadir',
         status: 'Hadir',
         date: dateStr
-      });
+      };
+      
+      if (activeSession && activeSession.id && !activeSession.id.toString().startsWith('local-')) {
+        insertData.sesi_id = activeSession.id;
+      }
+
+      const { error } = await supabase.from('attendance').insert(insertData);
+      if (error && error.message.includes('column "sesi_id"')) {
+        // Fallback if column sesi_id doesn't exist yet
+        delete insertData.sesi_id;
+        await supabase.from('attendance').insert(insertData);
+      }
     } catch (err) {
       console.warn('Database insert failed, saved to local cache:', err.message);
-      localStorage.setItem('kkn_attendance_cached', JSON.stringify(updated));
     }
 
     alert(`Presensi Kehadiran Berhasil pada jam ${timeStr}!`);
@@ -199,8 +293,8 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
 
   // Handle Simulated QR Scan
   const handleScanQrAction = () => {
-    if (!isScheduleInputtedByDosen) {
-      alert('Jadwal presensi belum diinput oleh Dosen DPL untuk hari ini. QR Code presensi belum dapat dipindai.');
+    if (!activeSession) {
+      alert('Sesi presensi belum dibuka oleh Dosen DPL untuk hari ini. QR Code presensi belum dapat dipindai.');
       return;
     }
 
@@ -355,21 +449,24 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                     </div>
 
                     {/* Dosen Schedule Status Notification */}
-                    {!isScheduleInputtedByDosen ? (
+                    {!activeSession ? (
                       <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem', textAlign: 'center', marginBottom: '1.5rem' }}>
                         <AlertTriangle size={24} style={{ color: '#d97706', margin: '0 auto 0.5rem auto' }} />
                         <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.35rem 0' }}>
-                          Belum Ada Jadwal Presensi Aktif Hari Ini ({currentDayIndonesian})
+                          Belum Ada Sesi Presensi Aktif dari Dosen DPL
                         </h4>
                         <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
-                          Dosen DPL / Admin KKN belum menginput jadwal presensi kegiatan untuk hari ini.<br />
-                          Tombol presensi dan scan QR akan otomatis aktif setelah Dosen menambahkan jadwal.
+                          Dosen DPL belum membuka sesi presensi QR harian broadcast saat ini.<br />
+                          Tombol presensi dan scan QR akan otomatis aktif setelah Dosen membuka sesi presensi.
                         </p>
                       </div>
                     ) : (
                       <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '1rem', textAlign: 'center', marginBottom: '1.5rem' }}>
-                        <span style={{ fontSize: '0.78rem', color: '#166534', fontWeight: 700 }}>
-                          ✓ Sesi Presensi Aktif: {todayActiveSchedule?.title} ({todayActiveSchedule?.timeStart} - {todayActiveSchedule?.timeEnd})
+                        <span style={{ fontSize: '0.78rem', color: '#166534', fontWeight: 700, display: 'block' }}>
+                          📢 SESI PRESENSI AKTIF: {activeSession?.title}
+                        </span>
+                        <span style={{ fontSize: '0.7rem', color: '#15803d', display: 'block', marginTop: '0.2rem' }}>
+                          Dibuka sejak jam {new Date(activeSession?.opened_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
                     )}

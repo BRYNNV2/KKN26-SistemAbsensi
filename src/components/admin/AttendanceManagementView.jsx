@@ -51,6 +51,12 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
   const [manualStatus, setManualStatus] = useState('Hadir');
   const [manualDate, setManualDate] = useState(new Date().toISOString().split('T')[0]);
 
+  // Broadcast QR Session state
+  const [activeSession, setActiveSession] = useState(null);
+  const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
+  const [sessionTitle, setSessionTitle] = useState('Presensi Kegiatan Harian KKN');
+  const [selectedScheduleId, setSelectedScheduleId] = useState('');
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 7;
@@ -59,6 +65,42 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
   const [schedules, setSchedules] = useState([]);
   const [attendanceData, setAttendanceData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Check active session from DB or localStorage
+  const checkActiveSession = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('sesi_presensi')
+        .select('*')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setActiveSession(data[0]);
+        setSessionTitle(data[0].title);
+      } else {
+        const cached = localStorage.getItem('kkn_active_session');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed.status === 'active') {
+            setActiveSession(parsed);
+            setSessionTitle(parsed.title);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to check active session:', err.message);
+      const cached = localStorage.getItem('kkn_active_session');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.status === 'active') {
+          setActiveSession(parsed);
+          setSessionTitle(parsed.title);
+        }
+      }
+    }
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -69,9 +111,19 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
     fetchSchedules();
     fetchAttendance();
     fetchStudents();
+    checkActiveSession();
 
     return () => clearInterval(timer);
   }, []);
+
+  // Poll attendance when activeSession is live
+  useEffect(() => {
+    if (!activeSession) return;
+    const interval = setInterval(() => {
+      fetchAttendance();
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [activeSession]);
 
   const fetchSchedules = async () => {
     try {
@@ -202,6 +254,57 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
   const [agendaTimeEnd, setAgendaTimeEnd] = useState('10:30');
   const [agendaGroup, setAgendaGroup] = useState('');
   const [agendaLocation, setAgendaLocation] = useState('');
+
+  const handleStartSession = async (e) => {
+    if (e) e.preventDefault();
+    const qrToken = `session-${Date.now()}`;
+    const newSession = {
+      title: sessionTitle,
+      dosen_id: user?.email || 'admin',
+      schedule_id: selectedScheduleId ? parseInt(selectedScheduleId) : null,
+      qr_token: qrToken,
+      status: 'active',
+      opened_at: new Date().toISOString()
+    };
+
+    try {
+      const { data, error } = await supabase
+        .from('sesi_presensi')
+        .insert(newSession)
+        .select();
+
+      if (error) throw error;
+      
+      const savedSession = data && data.length > 0 ? data[0] : newSession;
+      setActiveSession(savedSession);
+      localStorage.setItem('kkn_active_session', JSON.stringify(savedSession));
+    } catch (err) {
+      console.warn('Failed to start session in Supabase, using localStorage:', err.message);
+      const savedSession = {
+        id: `local-session-${Date.now()}`,
+        ...newSession
+      };
+      setActiveSession(savedSession);
+      localStorage.setItem('kkn_active_session', JSON.stringify(savedSession));
+    }
+    setIsSessionModalOpen(false);
+  };
+
+  const handleCloseSession = async () => {
+    if (!activeSession) return;
+    try {
+      if (!activeSession.id.toString().startsWith('local-')) {
+        await supabase
+          .from('sesi_presensi')
+          .update({ status: 'closed', closed_at: new Date().toISOString() })
+          .eq('id', activeSession.id);
+      }
+    } catch (err) {
+      console.warn('Failed to close session in Supabase:', err.message);
+    }
+    localStorage.removeItem('kkn_active_session');
+    setActiveSession(null);
+  };
 
   const fetchStudents = async () => {
     try {
@@ -579,7 +682,32 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                   </select>
                 </div>
 
-                <div className="toolbar-right">
+                <div className="toolbar-right" style={{ gap: '0.6rem' }}>
+                  {activeSession ? (
+                    <button 
+                      type="button" 
+                      className="btn-add-employee" 
+                      onClick={() => checkActiveSession()} 
+                      style={{ background: '#16a34a', borderColor: '#16a34a', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                    >
+                      <Sparkles size={16} className="sparkle-pulsing" />
+                      <span>Sesi Presensi Aktif</span>
+                    </button>
+                  ) : (
+                    <button 
+                      type="button" 
+                      className="btn-add-employee" 
+                      onClick={() => {
+                        setSessionTitle(`Presensi KKN - Tanggal ${new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}`);
+                        setIsSessionModalOpen(true);
+                      }} 
+                      style={{ background: '#0f172a', borderColor: '#0f172a', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                    >
+                      <PlusCircle size={16} />
+                      <span>Buka Sesi QR Broadcast</span>
+                    </button>
+                  )}
+                  
                   <button type="button" className="btn-add-employee" onClick={() => setIsAttendanceModalOpen(true)}>
                     <Plus size={16} />
                     <span>Isi Kehadiran</span>
@@ -1567,6 +1695,220 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                 </button>
               </div>
             </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Modal 1: Konfigurasi Pembukaan Sesi Presensi QR */}
+      {isSessionModalOpen && createPortal(
+        <div className="modal-overlay" onClick={() => setIsSessionModalOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(8px)', zIndex: 99999 }}>
+          <div className="modal-container" style={{ maxWidth: '500px', width: '90%', padding: '1.75rem', background: '#121215', border: '1px solid #27272a', borderRadius: '16px', boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7)' }} onClick={(e) => e.stopPropagation()}>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid #27272a', paddingBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#34d399' }}>
+                  <Sparkles size={22} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f4f4f5', margin: 0 }}>Buka Sesi Presensi QR</h3>
+                  <p style={{ fontSize: '0.78rem', color: '#a1a1aa', margin: '0.15rem 0 0 0' }}>Buka sesi presensi untuk semua mahasiswa kelompok Anda</p>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                onClick={() => setIsSessionModalOpen(false)}
+                style={{ background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer', padding: '0.4rem' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleStartSession} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e4e4e7' }}>Nama / Topik Presensi</label>
+                <input 
+                  type="text" 
+                  value={sessionTitle}
+                  onChange={(e) => setSessionTitle(e.target.value)}
+                  placeholder="Contoh: Presensi Pembekalan KKN Desa Parit"
+                  style={{ 
+                    width: '100%', 
+                    padding: '0.7rem 0.9rem', 
+                    background: '#18181b', 
+                    border: '1px solid #27272a', 
+                    borderRadius: '8px', 
+                    color: '#f4f4f5', 
+                    fontSize: '0.85rem', 
+                    outline: 'none'
+                  }}
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e4e4e7' }}>Hubungkan dengan Jadwal Agenda (Opsional)</label>
+                <select 
+                  value={selectedScheduleId}
+                  onChange={(e) => {
+                    setSelectedScheduleId(e.target.value);
+                    const selected = schedules.find(s => s.id.toString() === e.target.value);
+                    if (selected) {
+                      setSessionTitle(`Presensi: ${selected.title}`);
+                    }
+                  }}
+                  style={{ 
+                    width: '100%', 
+                    padding: '0.7rem 0.9rem', 
+                    background: '#18181b', 
+                    border: '1px solid #27272a', 
+                    borderRadius: '8px', 
+                    color: '#f4f4f5', 
+                    fontSize: '0.85rem', 
+                    outline: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="">-- Pilih Agenda --</option>
+                  {schedules.map(s => (
+                    <option key={s.id} value={s.id}>
+                      {s.day} - {s.title} ({s.timeStart} - {s.timeEnd})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem', paddingTop: '1rem', borderTop: '1px solid #27272a' }}>
+                <button 
+                  type="button" 
+                  onClick={() => setIsSessionModalOpen(false)}
+                  style={{ padding: '0.65rem 1.25rem', background: '#27272a', color: '#e4e4e7', border: 'none', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  Batal
+                </button>
+                <button 
+                  type="submit" 
+                  style={{ padding: '0.65rem 1.5rem', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#ffffff', border: 'none', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)' }}
+                >
+                  Mulai Sesi
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Modal 2: Dashboard Realtime Sesi Presensi QR Aktif */}
+      {activeSession && createPortal(
+        <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(9, 9, 11, 0.9)', backdropFilter: 'blur(10px)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+          <div className="modal-container" style={{ maxWidth: '900px', width: '100%', padding: '2rem', background: '#121215', border: '1px solid #27272a', borderRadius: '20px', boxShadow: '0 25px 70px rgba(0, 0, 0, 0.9)', display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: '2.5rem' }}>
+            
+            {/* Left Side: Giant QR & Status info */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRight: '1px solid #27272a', paddingRight: '2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.25rem', width: '100%' }}>
+                <Sparkles size={20} style={{ color: '#10b981' }} />
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f4f4f5', margin: 0 }}>Sesi Presensi QR Aktif</h3>
+              </div>
+
+              <div style={{ background: '#18181b', padding: '1rem', borderRadius: '12px', border: '1px solid #27272a', marginBottom: '1rem', width: '100%', textAlign: 'center' }}>
+                <h4 style={{ margin: 0, fontSize: '0.95rem', color: '#ffffff', fontWeight: 700 }}>{activeSession.title}</h4>
+                <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.75rem', color: '#a1a1aa' }}>
+                  Dibuka pada: {new Date(activeSession.opened_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
+
+              <div className="qr-code-scanner-container fullscreen-qr" style={{ width: '240px', height: '240px', margin: '0.5rem auto 1.5rem auto', position: 'relative' }}>
+                <div className="qr-laser-line" />
+                <svg className="qr-code-svg" viewBox="0 0 100 100" style={{ width: '100%', height: '100%', color: '#34d399' }}>
+                  <rect x="5" y="5" width="25" height="25" fill="none" stroke="currentColor" strokeWidth="4" />
+                  <rect x="10" y="10" width="15" height="15" fill="currentColor" />
+                  
+                  <rect x="70" y="5" width="25" height="25" fill="none" stroke="currentColor" strokeWidth="4" />
+                  <rect x="75" y="10" width="15" height="15" fill="currentColor" />
+                  
+                  <rect x="5" y="70" width="25" height="25" fill="none" stroke="currentColor" strokeWidth="4" />
+                  <rect x="10" y="75" width="15" height="15" fill="currentColor" />
+
+                  <rect x="40" y="10" width="8" height="8" fill="currentColor" />
+                  <rect x="52" y="15" width="8" height="12" fill="currentColor" />
+                  <rect x="10" y="40" width="12" height="8" fill="currentColor" />
+                  <rect x="40" y="40" width="18" height="18" fill="currentColor" />
+                  <rect x="70" y="40" width="8" height="15" fill="currentColor" />
+                  <rect x="82" y="48" width="10" height="10" fill="currentColor" />
+                  <rect x="40" y="70" width="12" height="8" fill="currentColor" />
+                  <rect x="56" y="78" width="18" height="8" fill="currentColor" />
+                  <rect x="80" y="70" width="12" height="12" fill="currentColor" />
+                </svg>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', width: '100%' }}>
+                <button 
+                  type="button" 
+                  onClick={handleCloseSession}
+                  style={{ width: '100%', padding: '0.85rem', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', color: '#ffffff', fontSize: '0.9rem', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 14px rgba(239, 68, 68, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                >
+                  <XCircle size={18} />
+                  <span>Akhiri / Tutup Sesi Presensi</span>
+                </button>
+                <span style={{ fontSize: '0.74rem', color: '#71717a', textAlign: 'center', display: 'block' }}>
+                  Mahasiswa dapat memindai QR ini atau mengeklik tombol presensi langsung di dashboard mereka.
+                </span>
+              </div>
+            </div>
+
+            {/* Right Side: Real-time Checked-in Students List */}
+            <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '500px' }}>
+              <div style={{ borderBottom: '1px solid #27272a', paddingBottom: '0.75rem', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h4 style={{ margin: 0, fontSize: '1rem', color: '#ffffff', fontWeight: 700 }}>Mahasiswa Sudah Absen</h4>
+                <span style={{ fontSize: '0.8rem', background: '#27272a', padding: '0.2rem 0.6rem', borderRadius: '20px', color: '#f4f4f5', fontWeight: 700 }}>
+                  {attendanceData.filter(a => a.date === new Date().toLocaleDateString('id-ID')).length} Orang
+                </span>
+              </div>
+
+              <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', paddingRight: '4px' }}>
+                {attendanceData.filter(a => a.date === new Date().toLocaleDateString('id-ID')).map((student, idx) => (
+                  <div 
+                    key={student.id || idx} 
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: '#18181b', border: '1px solid #27272a', borderRadius: '10px' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <img 
+                        src={student.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=e2e8f0&color=0f172a&bold=true`} 
+                        alt={student.name} 
+                        style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }} 
+                      />
+                      <div>
+                        <h5 style={{ margin: 0, fontSize: '0.85rem', color: '#ffffff', fontWeight: 700 }}>{student.name}</h5>
+                        <span style={{ fontSize: '0.72rem', color: '#71717a' }}>NIM: {student.nim}</span>
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={{ fontSize: '0.78rem', color: '#34d399', fontWeight: 700 }}>{student.checkIn}</span>
+                      <span style={{ fontSize: '0.65rem', display: 'block', color: '#71717a' }}>{student.group || 'Kelompok'}</span>
+                    </div>
+                  </div>
+                ))}
+
+                {attendanceData.filter(a => a.date === new Date().toLocaleDateString('id-ID')).length === 0 && (
+                  <div style={{ textAlign: 'center', padding: '4rem 1rem', color: '#71717a' }}>
+                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>⏳</div>
+                    <p style={{ fontSize: '0.85rem', margin: 0 }}>Menunggu mahasiswa melakukan presensi...</p>
+                  </div>
+                )}
+              </div>
+              
+              <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
+                <button 
+                  type="button" 
+                  onClick={() => setActiveSession(null)} 
+                  style={{ padding: '0.5rem 1rem', background: '#27272a', border: 'none', color: '#f4f4f5', borderRadius: '6px', fontSize: '0.8rem', cursor: 'pointer' }}
+                >
+                  Sembunyikan Jendela QR
+                </button>
+              </div>
+            </div>
+
           </div>
         </div>,
         document.body
