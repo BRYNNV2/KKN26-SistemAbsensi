@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Users, 
   UserCheck, 
@@ -959,8 +960,8 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
 
       </div>
 
-      {isAgendaModalOpen ? (
-        <div className="modal-overlay">
+      {isAgendaModalOpen && createPortal(
+        <div className="modal-overlay" style={{ zIndex: 99999 }}>
           <div className="modal-container" style={{ maxWidth: '480px' }}>
             <div className="modal-header">
               <div className="modal-title-group">
@@ -1098,10 +1099,12 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
               </div>
             </form>
           </div>
-        </div>
-      ) : null}
-      {isFullscreenQR ? (
-        <div className="modal-overlay" onClick={() => setIsFullscreenQR(false)}>
+        </div>,
+        document.body
+      )}
+
+      {isFullscreenQR && createPortal(
+        <div className="modal-overlay" onClick={() => setIsFullscreenQR(false)} style={{ zIndex: 99999 }}>
           <div className="modal-container" style={{ maxWidth: '420px', textAlign: 'center', padding: '2rem' }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1148,11 +1151,12 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
               Kode QR diperbarui otomatis dalam {qrCounter} detik
             </span>
           </div>
-        </div>
-      ) : null}
+        </div>,
+        document.body
+      )}
 
-      {selectedScheduleDetails ? (
-        <div className="modal-overlay" onClick={() => setSelectedScheduleDetails(null)} style={{ overflowY: 'auto', padding: '2rem 1rem' }}>
+      {selectedScheduleDetails && createPortal(
+        <div className="modal-overlay" onClick={() => setSelectedScheduleDetails(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(8px)', zIndex: 99999, overflowY: 'auto', padding: '2rem 1rem' }}>
           <div className="modal-container" style={{ maxWidth: '960px', width: '100%', padding: 0, overflow: 'hidden', background: '#121215', border: '1px solid #27272a' }} onClick={(e) => e.stopPropagation()}>
             
             {/* Modal Header Title */}
@@ -1391,131 +1395,212 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
             </div>
 
           </div>
-        </div>
-      ) : null}
+        </div>,
+        document.body
+      )}
 
-      {isAttendanceModalOpen ? (
-        <div className="modal-overlay" onClick={() => setIsAttendanceModalOpen(false)}>
-          <div className="modal-container" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
+      {isAttendanceModalOpen && createPortal(
+        <div className="modal-overlay" onClick={() => setIsAttendanceModalOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(8px)', zIndex: 99999 }}>
+          <div className="modal-container" style={{ maxWidth: '520px', width: '90%', padding: '1.75rem', background: '#121215', border: '1px solid #27272a', borderRadius: '16px', boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7)' }} onClick={(e) => e.stopPropagation()}>
             
-            <div className="modal-header">
-              <div className="modal-title-group">
-                <div className="modal-icon-badge" style={{ background: 'rgba(59,130,246,0.1)', color: '#3b82f6' }}>
-                  <Users size={20} />
+            {/* Modal Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid #27272a', paddingBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(37, 99, 235, 0.15)', border: '1px solid rgba(37, 99, 235, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa' }}>
+                  <Users size={22} />
                 </div>
                 <div>
-                  <h3 className="modal-title">Isi Kehadiran Manual</h3>
-                  <p className="modal-subtitle">Catat kehadiran mahasiswa KKN secara manual</p>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f4f4f5', margin: 0 }}>Isi Kehadiran Manual</h3>
+                  <p style={{ fontSize: '0.78rem', color: '#a1a1aa', margin: '0.15rem 0 0 0' }}>Catat log kehadiran mahasiswa KKN secara manual</p>
                 </div>
               </div>
               <button 
                 type="button" 
-                className="modal-close-btn"
                 onClick={() => setIsAttendanceModalOpen(false)}
+                style={{ background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer', padding: '0.4rem', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                <X size={18} />
+                <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleSaveManualAttendance} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginTop: '1rem' }}>
+            {/* Form Body */}
+            <form onSubmit={handleSaveManualAttendance} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               
               {/* Select Student */}
-              <div className="input-group">
-                <label className="input-label">Pilih Mahasiswa KKN</label>
-                <select 
-                  className="toolbar-select" 
-                  value={manualMhsId} 
-                  onChange={(e) => setManualMhsId(e.target.value)}
-                  style={{ width: '100%', height: '42px', paddingLeft: '0.5rem', background: 'var(--color-admin-bg)' }}
-                  required
-                >
-                  {students.map(s => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} - NIM {s.nim} ({s.department || 'Kelompok'})
-                    </option>
-                  ))}
-                  {students.length === 0 && (
-                    <option value="">Belum ada mahasiswa terdaftar</option>
-                  )}
-                </select>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e4e4e7' }}>Pilih Mahasiswa KKN</label>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <Users size={16} style={{ position: 'absolute', left: '0.85rem', color: '#71717a', pointerEvents: 'none' }} />
+                  <select 
+                    value={manualMhsId} 
+                    onChange={(e) => setManualMhsId(e.target.value)}
+                    style={{ 
+                      width: '100%', 
+                      padding: '0.7rem 0.9rem 0.7rem 2.5rem', 
+                      background: '#18181b', 
+                      border: '1px solid #27272a', 
+                      borderRadius: '8px', 
+                      color: '#f4f4f5', 
+                      fontSize: '0.85rem', 
+                      outline: 'none'
+                    }}
+                    required
+                  >
+                    {students.map(s => (
+                      <option key={s.id} value={s.id} style={{ background: '#18181b', color: '#f4f4f5' }}>
+                        {s.name} - NIM {s.nim} ({s.department || 'Kelompok'})
+                      </option>
+                    ))}
+                    {students.length === 0 && (
+                      <option value="" style={{ background: '#18181b', color: '#f4f4f5' }}>Belum ada mahasiswa terdaftar</option>
+                    )}
+                  </select>
+                </div>
               </div>
 
               {/* Status */}
-              <div className="input-group">
-                <label className="input-label">Status Presensi</label>
-                <select 
-                  className="toolbar-select" 
-                  value={manualStatus} 
-                  onChange={(e) => setManualStatus(e.target.value)}
-                  style={{ width: '100%', height: '42px', paddingLeft: '0.5rem', background: 'var(--color-admin-bg)' }}
-                  required
-                >
-                  <option value="Hadir">Hadir</option>
-                  <option value="Terlambat">Terlambat</option>
-                  <option value="Absen">Absen</option>
-                  <option value="Izin">Izin</option>
-                </select>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e4e4e7' }}>Status Presensi</label>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <UserCheck size={16} style={{ position: 'absolute', left: '0.85rem', color: '#71717a', pointerEvents: 'none' }} />
+                  <select 
+                    value={manualStatus} 
+                    onChange={(e) => setManualStatus(e.target.value)}
+                    style={{ 
+                      width: '100%', 
+                      padding: '0.7rem 0.9rem 0.7rem 2.5rem', 
+                      background: '#18181b', 
+                      border: '1px solid #27272a', 
+                      borderRadius: '8px', 
+                      color: '#f4f4f5', 
+                      fontSize: '0.85rem', 
+                      outline: 'none'
+                    }}
+                    required
+                  >
+                    <option value="Hadir" style={{ background: '#18181b', color: '#f4f4f5' }}>Hadir</option>
+                    <option value="Terlambat" style={{ background: '#18181b', color: '#f4f4f5' }}>Terlambat</option>
+                    <option value="Absen" style={{ background: '#18181b', color: '#f4f4f5' }}>Absen</option>
+                    <option value="Izin" style={{ background: '#18181b', color: '#f4f4f5' }}>Izin</option>
+                  </select>
+                </div>
               </div>
 
               {/* Date */}
-              <div className="input-group">
-                <label className="input-label">Tanggal Presensi</label>
-                <input 
-                  type="date"
-                  className="form-input"
-                  value={manualDate}
-                  onChange={(e) => setManualDate(e.target.value)}
-                  required
-                  style={{ paddingLeft: '0.85rem' }}
-                />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e4e4e7' }}>Tanggal Presensi</label>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <Calendar size={16} style={{ position: 'absolute', left: '0.85rem', color: '#71717a', pointerEvents: 'none' }} />
+                  <input 
+                    type="date"
+                    value={manualDate}
+                    onChange={(e) => setManualDate(e.target.value)}
+                    style={{ 
+                      width: '100%', 
+                      padding: '0.7rem 0.9rem 0.7rem 2.5rem', 
+                      background: '#18181b', 
+                      border: '1px solid #27272a', 
+                      borderRadius: '8px', 
+                      color: '#f4f4f5', 
+                      fontSize: '0.85rem', 
+                      outline: 'none'
+                    }}
+                    required
+                  />
+                </div>
               </div>
 
               {/* Check In / Out Row */}
-              <div className="form-row-grid">
-                <div className="input-group">
-                  <label className="input-label">Jam Masuk (Check In)</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    placeholder="Contoh: 08:00 AM" 
-                    value={manualCheckIn}
-                    onChange={(e) => setManualCheckIn(e.target.value)}
-                    required
-                    style={{ paddingLeft: '0.85rem' }}
-                  />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e4e4e7' }}>Jam Masuk (Check In)</label>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <Clock size={16} style={{ position: 'absolute', left: '0.85rem', color: '#71717a', pointerEvents: 'none' }} />
+                    <input 
+                      type="text" 
+                      placeholder="08:00 AM" 
+                      value={manualCheckIn}
+                      onChange={(e) => setManualCheckIn(e.target.value)}
+                      style={{ 
+                        width: '100%', 
+                        padding: '0.7rem 0.9rem 0.7rem 2.5rem', 
+                        background: '#18181b', 
+                        border: '1px solid #27272a', 
+                        borderRadius: '8px', 
+                        color: '#f4f4f5', 
+                        fontSize: '0.85rem', 
+                        outline: 'none'
+                      }}
+                      required
+                    />
+                  </div>
                 </div>
 
-                <div className="input-group">
-                  <label className="input-label">Jam Pulang (Check Out)</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    placeholder="Contoh: 04:00 PM" 
-                    value={manualCheckOut}
-                    onChange={(e) => setManualCheckOut(e.target.value)}
-                    required
-                    style={{ paddingLeft: '0.85rem' }}
-                  />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e4e4e7' }}>Jam Pulang (Check Out)</label>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <Clock size={16} style={{ position: 'absolute', left: '0.85rem', color: '#71717a', pointerEvents: 'none' }} />
+                    <input 
+                      type="text" 
+                      placeholder="04:00 PM" 
+                      value={manualCheckOut}
+                      onChange={(e) => setManualCheckOut(e.target.value)}
+                      style={{ 
+                        width: '100%', 
+                        padding: '0.7rem 0.9rem 0.7rem 2.5rem', 
+                        background: '#18181b', 
+                        border: '1px solid #27272a', 
+                        borderRadius: '8px', 
+                        color: '#f4f4f5', 
+                        fontSize: '0.85rem', 
+                        outline: 'none'
+                      }}
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 
               {/* Form Actions */}
-              <div className="modal-footer" style={{ padding: '0.5rem 0 0 0' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem', paddingTop: '1rem', borderTop: '1px solid #27272a' }}>
                 <button 
                   type="button" 
-                  className="btn-cancel"
                   onClick={() => setIsAttendanceModalOpen(false)}
+                  style={{
+                    padding: '0.65rem 1.25rem',
+                    background: '#27272a',
+                    color: '#e4e4e7',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
                 >
                   Batal
                 </button>
-                <button type="submit" className="btn-submit-modal" style={{ background: '#3b82f6' }}>
+                <button 
+                  type="submit" 
+                  style={{
+                    padding: '0.65rem 1.5rem',
+                    background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)'
+                  }}
+                >
                   Simpan Presensi
                 </button>
               </div>
             </form>
           </div>
-        </div>
-      ) : null}
+        </div>,
+        document.body
+      )}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, User, Mail, Hash, MapPin, Lock, CheckCircle2, AlertCircle, ShieldCheck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -100,8 +101,10 @@ export default function AddMahasiswaModal({ isOpen, onClose, onAddSuccess }) {
     }
   };
 
-  return (
-    <div className="modal-overlay">
+  if (!isOpen) return null;
+
+  return createPortal(
+    <div className="modal-overlay" style={{ zIndex: 99999 }}>
       <div className="modal-container">
         {/* Modal Header */}
         <div className="modal-header">
@@ -252,6 +255,7 @@ export default function AddMahasiswaModal({ isOpen, onClose, onAddSuccess }) {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
