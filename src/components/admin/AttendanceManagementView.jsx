@@ -109,14 +109,14 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
     return () => clearInterval(timer);
   }, []);
 
-  // Poll attendance when activeSession is live
+  // Poll attendance and schedules updates every 3 seconds
   useEffect(() => {
-    if (!activeSession) return;
     const interval = setInterval(() => {
       fetchAttendance();
+      fetchSchedules();
     }, 3000);
     return () => clearInterval(interval);
-  }, [activeSession]);
+  }, []);
 
   const fetchSchedules = async () => {
     try {

@@ -167,11 +167,12 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
     fetchTodayAttendance();
     checkActiveSession();
 
-    // Poll active session status every 3 seconds
+    // Poll active session status and schedules every 3 seconds
     const interval = setInterval(() => {
       checkActiveSession();
       fetchMyAttendance();
       fetchTodayAttendance();
+      fetchSchedules();
     }, 3000);
 
     return () => clearInterval(interval);
@@ -217,7 +218,18 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
       const { data, error } = await supabase.from('schedules').select('*').order('id', { ascending: true });
       if (error) throw error;
       if (data) {
-        setSchedules(data);
+        const mapped = data.map(s => ({
+          id: s.id,
+          title: s.title,
+          code: s.code || 'KKN_ACT',
+          day: s.day,
+          timeStart: s.time_start || '08:00',
+          timeEnd: s.time_end || '10:00',
+          group: s.group_kkn || 'Semua Kelompok',
+          location: s.location
+        }));
+        setSchedules(mapped);
+        localStorage.setItem('kkn_schedules_cached', JSON.stringify(mapped));
       }
     } catch (err) {
       console.warn('Failed to load schedules from Supabase:', err.message);
