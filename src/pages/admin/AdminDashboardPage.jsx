@@ -7,12 +7,12 @@ import {
   ChevronRight,
   Calendar as CalendarIcon
 } from 'lucide-react';
-import AdminSidebar from '../components/AdminSidebar';
-import AdminTopbar from '../components/AdminTopbar';
-import AttendanceChart from '../components/AttendanceChart';
-import MiniCalendar from '../components/MiniCalendar';
-import MahasiswaManagementView from '../components/MahasiswaManagementView';
-import AttendanceManagementView from '../components/AttendanceManagementView';
+import AdminSidebar from '../../components/admin/AdminSidebar';
+import AdminTopbar from '../../components/admin/AdminTopbar';
+import AttendanceChart from '../../components/admin/AttendanceChart';
+import MiniCalendar from '../../components/common/MiniCalendar';
+import MahasiswaManagementView from '../../components/admin/MahasiswaManagementView';
+import AttendanceManagementView from '../../components/admin/AttendanceManagementView';
 
 export default function AdminDashboardPage({ user, onLogout, onSwitchRole }) {
   const [activeTab, setActiveTab] = useState('dashboard');

@@ -20,9 +20,9 @@ import {
   ChevronRight,
   Sparkles
 } from 'lucide-react';
-import MahasiswaSidebar from '../components/MahasiswaSidebar';
-import MahasiswaTopbar from '../components/MahasiswaTopbar';
-import { supabase } from '../lib/supabase';
+import MahasiswaSidebar from '../../components/mahasiswa/MahasiswaSidebar';
+import MahasiswaTopbar from '../../components/mahasiswa/MahasiswaTopbar';
+import { supabase } from '../../lib/supabase';
 
 export default function MahasiswaDashboardPage({ user, onLogout, onSwitchRole }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);

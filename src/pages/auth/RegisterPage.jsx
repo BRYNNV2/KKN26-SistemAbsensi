@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { User, Mail, Lock, Eye, EyeOff, Hash, AlertCircle, CheckCircle2, Award } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { registerUser } from '../lib/supabase';
+import { registerUser } from '../../lib/supabase';
 
 export default function RegisterPage({ onNavigate }) {
   const [nama, setNama] = useState('');

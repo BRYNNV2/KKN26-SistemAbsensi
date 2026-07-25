@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, User, Mail, Hash, MapPin, Lock, CheckCircle2, AlertCircle, ShieldCheck } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../../lib/supabase';
 
 export default function AddMahasiswaModal({ isOpen, onClose, onAddSuccess }) {
   const [nama, setNama] = useState('');

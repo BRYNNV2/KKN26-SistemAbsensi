@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, ArrowLeft, AlertCircle, CheckCircle2, Award } from 'lucide-react';
-import { requestPasswordReset } from '../lib/supabase';
+import { requestPasswordReset } from '../../lib/supabase';
 
 export default function ForgotPasswordPage({ onNavigate }) {
   const [email, setEmail] = useState('');

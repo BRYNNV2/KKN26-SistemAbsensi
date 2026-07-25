@@ -25,7 +25,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import AttendanceChart from './AttendanceChart';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../../lib/supabase';
 
 export default function AttendanceManagementView({ user, onLogout, theme, onToggleTheme }) {
   const [activeTab, setActiveTab] = useState('daily'); // 'daily', 'schedule', 'requests', 'reports'

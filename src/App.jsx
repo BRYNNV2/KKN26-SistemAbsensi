@@ -1,9 +1,9 @@
 import React, { useState, useRef } from 'react';
 import gsap from 'gsap';
-import LoginPage from './pages/LoginPage';
-import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import AdminDashboardPage from './pages/AdminDashboardPage';
-import MahasiswaDashboardPage from './pages/MahasiswaDashboardPage';
+import LoginPage from './pages/auth/LoginPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import MahasiswaDashboardPage from './pages/mahasiswa/MahasiswaDashboardPage';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('login'); // 'login', 'forgot-password', 'dashboard'

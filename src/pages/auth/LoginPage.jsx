@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, Lock, Eye, EyeOff, CheckCircle2, AlertCircle, Award } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { authenticateUser } from '../lib/supabase';
+import { authenticateUser } from '../../lib/supabase';
 
 export default function LoginPage({ onNavigate, onLoginSuccess }) {
   const [identifier, setIdentifier] = useState('');

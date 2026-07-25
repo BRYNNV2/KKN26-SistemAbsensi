@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import AdminTopbar from './AdminTopbar';
 import AddMahasiswaModal from './AddMahasiswaModal';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../../lib/supabase';
 
 export default function MahasiswaManagementView({ user, onLogout, theme, onToggleTheme }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
