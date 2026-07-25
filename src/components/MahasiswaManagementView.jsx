@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   UserCheck, 
@@ -10,104 +10,95 @@ import {
   Edit2, 
   Trash2, 
   ChevronLeft, 
-  ChevronRight
+  ChevronRight,
+  Database,
+  Terminal
 } from 'lucide-react';
 import AdminTopbar from './AdminTopbar';
 import AddMahasiswaModal from './AddMahasiswaModal';
+import { supabase } from '../lib/supabase';
 
 export default function MahasiswaManagementView({ user, onLogout, theme, onToggleTheme }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTabFilter, setActiveTabFilter] = useState('all');
+  const [mahasiswaList, setMahasiswaList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showSqlAlert, setShowSqlAlert] = useState(false);
 
-  // Initial Dataset
-  const [mahasiswaList, setMahasiswaList] = useState([
-    {
-      id: 'EMP-1001',
-      name: 'Emma Johnson',
-      nim: '21081010045',
-      department: 'Kelompok 14 - Sukamaju',
-      role: 'Ketua Kelompok KKN',
-      status: 'Active',
-      workType: 'Geofence GPS',
-      joiningDate: 'May 24, 2026',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'EMP-1002',
-      name: 'Liam Smith',
-      nim: '21081010088',
-      department: 'Kelompok 08 - Sukaraja',
-      role: 'Sekretaris KKN',
-      status: 'Active',
-      workType: 'Manual DPL',
-      joiningDate: 'Jun 12, 2026',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'EMP-1003',
-      name: 'Olivia Brown',
-      nim: '21081010102',
-      department: 'Kelompok 14 - Sukamaju',
-      role: 'Anggota KKN',
-      status: 'On Leave',
-      workType: 'Geofence GPS',
-      joiningDate: 'Aug 01, 2026',
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'EMP-1004',
-      name: 'Noah Williams',
-      nim: '21081010156',
-      department: 'Kelompok 03 - Sukamulia',
-      role: 'Bendahara KKN',
-      status: 'Active',
-      workType: 'On-site',
-      joiningDate: 'Jan 18, 2026',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'EMP-1005',
-      name: 'Ava Davis',
-      nim: '21081010210',
-      department: 'Kelompok 21 - Sukarame',
-      role: 'Anggota KKN',
-      status: 'Active',
-      workType: 'Geofence GPS',
-      joiningDate: 'Mar 03, 2026',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'EMP-1006',
-      name: 'Mason Lee',
-      nim: '21081010255',
-      department: 'Kelompok 14 - Sukamaju',
-      role: 'Koordinator Publikasi',
-      status: 'Probation',
-      workType: 'Geofence GPS',
-      joiningDate: 'Apr 15, 2026',
-      avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'EMP-1007',
-      name: 'Sophia Garcia',
-      nim: '21081010312',
-      department: 'Kelompok 05 - Sukajaya',
-      role: 'Anggota KKN',
-      status: 'Active',
-      workType: 'On-site',
-      joiningDate: 'Feb 20, 2026',
-      avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&auto=format&fit=crop&q=80'
+  useEffect(() => {
+    fetchMahasiswa();
+  }, []);
+
+  const fetchMahasiswa = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('mahasiswa')
+        .select('*')
+        .order('joining_date', { ascending: false });
+
+      if (error) {
+        console.warn('Failed to load from Supabase:', error.message);
+        if (error.message.includes('relation "public.mahasiswa" does not exist') || error.code === '42P01') {
+          setShowSqlAlert(true);
+        }
+        // Fallback to local storage or dummy data so page is not empty
+        const cached = localStorage.getItem('kkn_mahasiswa_cached');
+        if (cached) {
+          setMahasiswaList(JSON.parse(cached));
+        } else {
+          // Initial fallback data
+          const fallbacks = [
+            { id: '1', name: 'Emma Johnson', nim: '21081010045', department: 'Kelompok 14 - Sukamaju', role: 'Ketua Kelompok KKN', status: 'Active', workType: 'Geofence GPS', joiningDate: 'May 24, 2026', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100' },
+            { id: '2', name: 'Liam Smith', nim: '21081010088', department: 'Kelompok 08 - Sukaraja', role: 'Sekretaris KKN', status: 'Active', workType: 'Manual DPL', joiningDate: 'Jun 12, 2026', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100' },
+            { id: '3', name: 'Olivia Brown', nim: '21081010102', department: 'Kelompok 14 - Sukamaju', role: 'Anggota KKN', status: 'On Leave', workType: 'Geofence GPS', joiningDate: 'Aug 01, 2026', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100' }
+          ];
+          setMahasiswaList(fallbacks);
+          localStorage.setItem('kkn_mahasiswa_cached', JSON.stringify(fallbacks));
+        }
+      } else if (data) {
+        // Map database fields to components fields
+        const mapped = data.map(m => ({
+          id: m.id,
+          name: m.name,
+          nim: m.nim,
+          department: m.department,
+          role: m.role || 'Mahasiswa KKN',
+          status: m.status || 'Active',
+          workType: m.work_type || 'Geofence GPS',
+          joiningDate: new Date(m.joining_date).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+          avatar: m.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100'
+        }));
+        setMahasiswaList(mapped);
+        localStorage.setItem('kkn_mahasiswa_cached', JSON.stringify(mapped));
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
     }
-  ]);
-
-  const handleAddSuccess = (newMahasiswa) => {
-    setMahasiswaList([newMahasiswa, ...mahasiswaList]);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus akun mahasiswa ini?')) {
-      setMahasiswaList(mahasiswaList.filter(m => m.id !== id));
+  const handleAddSuccess = (newMahasiswa) => {
+    const updated = [newMahasiswa, ...mahasiswaList];
+    setMahasiswaList(updated);
+    localStorage.setItem('kkn_mahasiswa_cached', JSON.stringify(updated));
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Apakah Anda yakin ingin menghapus akun mahasiswa ini dari database?')) {
+      try {
+        const { error } = await supabase.from('mahasiswa').delete().eq('id', id);
+        if (error) {
+          console.warn('DB delete failed, deleting locally:', error.message);
+        }
+        const updated = mahasiswaList.filter(m => m.id !== id);
+        setMahasiswaList(updated);
+        localStorage.setItem('kkn_mahasiswa_cached', JSON.stringify(updated));
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 
@@ -135,8 +126,8 @@ export default function MahasiswaManagementView({ user, onLogout, theme, onToggl
             </div>
             <div className="kpi-details">
               <span className="kpi-title">Total Mahasiswa KKN</span>
-              <h3 className="kpi-value">1,248</h3>
-              <span className="kpi-trend positive">↗ 5.2% dari bulan lalu</span>
+              <h3 className="kpi-value">{mahasiswaList.length}</h3>
+              <span className="kpi-trend positive">↗ Berdasar database</span>
             </div>
           </div>
 
@@ -146,8 +137,8 @@ export default function MahasiswaManagementView({ user, onLogout, theme, onToggl
             </div>
             <div className="kpi-details">
               <span className="kpi-title">Aktif Presensi KKN</span>
-              <h3 className="kpi-value">1,182</h3>
-              <span className="kpi-trend positive">↗ 94.7% di desa penempatan</span>
+              <h3 className="kpi-value">{mahasiswaList.filter(m => m.status === 'Active').length}</h3>
+              <span className="kpi-trend positive">↗ Status aktif</span>
             </div>
           </div>
 
@@ -157,8 +148,8 @@ export default function MahasiswaManagementView({ user, onLogout, theme, onToggl
             </div>
             <div className="kpi-details">
               <span className="kpi-title">Dalam Masa Izin</span>
-              <h3 className="kpi-value">38</h3>
-              <span className="kpi-trend warning">↘ 12.0% dari bulan lalu</span>
+              <h3 className="kpi-value">{mahasiswaList.filter(m => m.status === 'On Leave' || m.status === 'Leave' || m.status === 'Izin').length}</h3>
+              <span className="kpi-trend warning">↘ Status izin/dispensasi</span>
             </div>
           </div>
 
@@ -167,12 +158,40 @@ export default function MahasiswaManagementView({ user, onLogout, theme, onToggl
               <UserPlus size={22} />
             </div>
             <div className="kpi-details">
-              <span className="kpi-title">Mahasiswa Terdaftar Baru</span>
-              <h3 className="kpi-value">28</h3>
-              <span className="kpi-trend positive">↗ 27.3% terdaftar bulan ini</span>
+              <span className="kpi-title">Mahasiswa Baru</span>
+              <h3 className="kpi-value">{mahasiswaList.length > 3 ? 3 : mahasiswaList.length}</h3>
+              <span className="kpi-trend positive">↗ Baru didaftarkan</span>
             </div>
           </div>
         </div>
+
+        {showSqlAlert && (
+          <div className="sql-setup-alert-banner" style={{ background: 'var(--color-admin-card)', border: '1.5px solid #ef4444', borderRadius: '12px', padding: '1.25rem', marginBottom: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+            <Database size={24} style={{ color: '#ef4444', flexShrink: 0, marginTop: '2px' }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h4 style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--color-text-main)', margin: '0 0 0.25rem 0' }}>Supabase SQL Table Setup Required</h4>
+              <p style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', margin: '0 0 0.75rem 0', lineHeight: '1.4' }}>
+                Tabel database <code>mahasiswa</code> belum terdeteksi di instansi Supabase Anda. 
+                Silakan buka <strong>SQL Editor</strong> di dashboard Supabase Anda dan jalankan perintah query berikut untuk menginisialisasi tabel-tabel presensi:
+              </p>
+              <pre style={{ background: '#09090b', color: '#a7f3d0', padding: '1rem', borderRadius: '8px', fontSize: '0.72rem', overflowX: 'auto', fontFamily: 'monospace', margin: 0, border: '1px solid #27272a' }}>
+{`-- Salin & Jalankan di SQL Editor Supabase Anda:
+create table public.mahasiswa (
+  id uuid primary key,
+  nim varchar(50) unique not null,
+  name varchar(255) not null,
+  email varchar(255) unique not null,
+  department varchar(255) default 'Kelompok 14 - Sukamaju',
+  role varchar(100) default 'Mahasiswa KKN',
+  status varchar(50) default 'Active',
+  work_type varchar(50) default 'Geofence GPS',
+  joining_date timestamp with time zone default timezone('utc'::text, now()),
+  avatar_url varchar(500) default 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100'
+);`}
+              </pre>
+            </div>
+          </div>
+        )}
 
         {/* Content Layout (Table Left + Sidebar Right) */}
         <div className="mgmt-content-grid">

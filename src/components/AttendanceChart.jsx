@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, Info, Calendar } from 'lucide-react';
+import { ChevronDown, Info } from 'lucide-react';
 
 export default function AttendanceChart({ title = "Growth Trend", type = "growth" }) {
   // Preset datasets for dynamic filtering
@@ -102,7 +102,7 @@ export default function AttendanceChart({ title = "Growth Trend", type = "growth
     return { x, y, val: item.val, label: item.label, detail: item.detail };
   });
 
-  // Build SVG path
+  // Build SVG smooth Bezier path
   const pathD = points.reduce((acc, point, i, arr) => {
     if (i === 0) return `M ${point.x} ${point.y}`;
     const prev = arr[i - 1];
@@ -178,26 +178,33 @@ export default function AttendanceChart({ title = "Growth Trend", type = "growth
           </div>
         )}
 
-        <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="admin-svg-chart">
+        <svg key={selectedFilter} viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="admin-svg-chart">
           <defs>
             <linearGradient id={`chartGrad-${type}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#2563eb" stopOpacity="0.28" />
+              <stop offset="0%" stopColor="#2563eb" stopOpacity="0.3" />
               <stop offset="100%" stopColor="#2563eb" stopOpacity="0.0" />
             </linearGradient>
           </defs>
 
-          {/* Grid lines */}
+          {/* Background Grid Lines */}
           <line x1={paddingLeft} y1={paddingTop} x2={svgWidth - paddingRight} y2={paddingTop} stroke="#f1f5f9" strokeDasharray="4 4" />
           <line x1={paddingLeft} y1={paddingTop + chartHeight / 2} x2={svgWidth - paddingRight} y2={paddingTop + chartHeight / 2} stroke="#f1f5f9" strokeDasharray="4 4" />
           <line x1={paddingLeft} y1={svgHeight - paddingBottom} x2={svgWidth - paddingRight} y2={svgHeight - paddingBottom} stroke="#e2e8f0" strokeWidth="1" />
 
-          {/* Dynamic Area Fill */}
-          <path d={areaD} fill={`url(#chartGrad-${type})`} style={{ transition: 'all 0.4s ease' }} />
+          {/* Area Fill Gradient */}
+          <path d={areaD} fill={`url(#chartGrad-${type})`} className="animated-chart-area" />
 
-          {/* Dynamic Smooth Line */}
-          <path d={pathD} fill="none" stroke="#2563eb" strokeWidth="3" strokeLinecap="round" style={{ transition: 'all 0.4s ease' }} />
+          {/* Line Path Drawing Animation from Start to End Point */}
+          <path 
+            d={pathD} 
+            fill="none" 
+            stroke="#2563eb" 
+            strokeWidth="3.5" 
+            strokeLinecap="round" 
+            className="animated-chart-line"
+          />
 
-          {/* Interactive Data Points */}
+          {/* Data Points */}
           {points.map((pt, idx) => {
             const isHovered = hoveredPoint === idx;
             return (
@@ -217,7 +224,7 @@ export default function AttendanceChart({ title = "Growth Trend", type = "growth
                 <circle 
                   cx={pt.x} 
                   cy={pt.y} 
-                  r={isHovered ? 6 : 4.5} 
+                  r={isHovered ? 6.5 : 4.5} 
                   fill="#ffffff" 
                   stroke="#2563eb" 
                   strokeWidth={isHovered ? 3 : 2.5} 

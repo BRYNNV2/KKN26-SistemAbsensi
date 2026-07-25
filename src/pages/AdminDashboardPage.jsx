@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Users, 
   UserCheck, 
@@ -12,6 +12,7 @@ import AdminTopbar from '../components/AdminTopbar';
 import AttendanceChart from '../components/AttendanceChart';
 import MiniCalendar from '../components/MiniCalendar';
 import MahasiswaManagementView from '../components/MahasiswaManagementView';
+import AttendanceManagementView from '../components/AttendanceManagementView';
 
 export default function AdminDashboardPage({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -107,9 +108,15 @@ export default function AdminDashboardPage({ user, onLogout }) {
 
       {/* Main Content Area */}
       <div className="admin-main-wrapper">
-        {/* Render Mahasiswa KKN Management View when activeTab === 'mahasiswa' */}
         {activeTab === 'mahasiswa' ? (
           <MahasiswaManagementView 
+            user={user} 
+            onLogout={onLogout} 
+            theme={theme}
+            onToggleTheme={handleToggleTheme}
+          />
+        ) : activeTab === 'attendance' ? (
+          <AttendanceManagementView 
             user={user} 
             onLogout={onLogout} 
             theme={theme}
@@ -127,9 +134,9 @@ export default function AdminDashboardPage({ user, onLogout }) {
 
             {/* Dashboard Body Grid */}
             <div className="admin-dashboard-body">
-              {/* KPI Metric Cards Row (4 Columns) */}
+              {/* KPI Metric Cards Row (4 Columns) with Staggered Fade Up Animations */}
               <div className="kpi-cards-grid">
-                <div className="kpi-card blue">
+                <div className="kpi-card blue animate-fade-up stagger-1">
                   <div className="kpi-icon-wrapper blue">
                     <Users size={22} />
                   </div>
@@ -140,7 +147,7 @@ export default function AdminDashboardPage({ user, onLogout }) {
                   </div>
                 </div>
 
-                <div className="kpi-card emerald">
+                <div className="kpi-card emerald animate-fade-up stagger-2">
                   <div className="kpi-icon-wrapper emerald">
                     <UserCheck size={22} />
                   </div>
@@ -151,7 +158,7 @@ export default function AdminDashboardPage({ user, onLogout }) {
                   </div>
                 </div>
 
-                <div className="kpi-card amber">
+                <div className="kpi-card amber animate-fade-up stagger-3">
                   <div className="kpi-icon-wrapper amber">
                     <Clock size={22} />
                   </div>
@@ -162,7 +169,7 @@ export default function AdminDashboardPage({ user, onLogout }) {
                   </div>
                 </div>
 
-                <div className="kpi-card purple">
+                <div className="kpi-card purple animate-fade-up stagger-4">
                   <div className="kpi-icon-wrapper purple">
                     <MapPin size={22} />
                   </div>
@@ -176,14 +183,20 @@ export default function AdminDashboardPage({ user, onLogout }) {
 
               {/* Middle Row: Charts & Mini Calendar */}
               <div className="charts-row-grid">
-                <AttendanceChart title="Pertumbuhan Mahasiswa" type="growth" />
-                <AttendanceChart title="Trend Presensi Harian" type="attendance" />
-                <MiniCalendar />
+                <div className="animate-fade-up stagger-5">
+                  <AttendanceChart title="Pertumbuhan Mahasiswa" type="growth" />
+                </div>
+                <div className="animate-fade-up stagger-6">
+                  <AttendanceChart title="Trend Presensi Harian" type="attendance" />
+                </div>
+                <div className="animate-fade-up stagger-7">
+                  <MiniCalendar />
+                </div>
               </div>
 
               {/* Bottom Row: Recent Activity Table & Upcoming Events */}
               <div className="bottom-row-grid">
-                <div className="activity-table-card">
+                <div className="activity-table-card animate-fade-up stagger-8">
                   <div className="card-table-header">
                     <h3 className="table-card-title">Aktivitas Presensi Terkini</h3>
                   </div>
@@ -233,7 +246,7 @@ export default function AdminDashboardPage({ user, onLogout }) {
                   </div>
                 </div>
 
-                <div className="upcoming-events-card">
+                <div className="upcoming-events-card animate-fade-up stagger-8">
                   <div className="events-card-header">
                     <h3 className="events-title">Agenda & Supervisi KKN</h3>
                   </div>

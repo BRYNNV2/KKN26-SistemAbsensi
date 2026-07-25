@@ -26,7 +26,6 @@ export default function AdminSidebar({
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'mahasiswa', label: 'Mahasiswa KKN', icon: GraduationCap },
-    { id: 'dosen', label: 'Dosen DPL', icon: Users },
     { id: 'attendance', label: 'Presensi & Absensi', icon: CalendarCheck },
     { id: 'location', label: 'Desa Penempatan', icon: MapPin },
     { id: 'reports', label: 'Laporan Kegiatan', icon: FileText },

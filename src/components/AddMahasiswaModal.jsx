@@ -48,18 +48,38 @@ export default function AddMahasiswaModal({ isOpen, onClose, onAddSuccess }) {
         console.warn('Supabase auth notice:', error.message);
       }
 
+      // 2. Insert profile record into public.mahasiswa table
+      const studentId = data?.user?.id || `mhs-${Date.now()}`;
+      const avatarUrl = `https://images.unsplash.com/photo-${1534528741775 + Math.floor(Math.random() * 1000)}?w=100&auto=format&fit=crop&q=80`;
+      
+      const { error: dbError } = await supabase.from('mahasiswa').insert({
+        id: studentId,
+        nim: nim.trim(),
+        name: nama.trim(),
+        email: email.trim(),
+        department: kelompok,
+        role: 'Mahasiswa KKN',
+        status: 'Active',
+        work_type: 'Geofence GPS',
+        avatar_url: avatarUrl
+      });
+
+      if (dbError) {
+        console.warn('Supabase DB Insert notice/error (table may not exist yet):', dbError.message);
+      }
+
       // Create new student object for state
       const newMahasiswa = {
-        id: Date.now(),
-        name: nama,
-        nim: nim,
+        id: studentId,
+        name: nama.trim(),
+        nim: nim.trim(),
         department: kelompok,
         role: 'Mahasiswa KKN',
         status: 'Active',
         workType: 'Geofence GPS',
         joiningDate: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
         desa: kelompok.split('-')[1]?.trim() || 'Desa Sukamaju',
-        avatar: `https://images.unsplash.com/photo-${1534528741775 + Math.floor(Math.random() * 1000)}?w=100&auto=format&fit=crop&q=80`
+        avatar: avatarUrl
       };
 
       setSuccessMsg(`Akun Mahasiswa ${nama} (NIM: ${nim}) Berhasil Didaftarkan!`);
