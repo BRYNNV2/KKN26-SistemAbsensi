@@ -1691,45 +1691,39 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
         <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(9, 9, 11, 0.9)', backdropFilter: 'blur(10px)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
           <div className="modal-container" style={{ maxWidth: '900px', width: '100%', padding: '2rem', background: '#121215', border: '1px solid #27272a', borderRadius: '20px', boxShadow: '0 25px 70px rgba(0, 0, 0, 0.9)', display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: '2.5rem' }}>
             
-            {/* Left Side: Giant QR & Status info */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRight: '1px solid #27272a', paddingRight: '2rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.25rem', width: '100%' }}>
+            {/* Left Side: Broadcast Status & Session Details (NO QR shown) */}
+            <div style={{ display: 'flex', flexDirection: 'column', borderRight: '1px solid #27272a', paddingRight: '2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.25rem' }}>
                 <Sparkles size={20} style={{ color: '#10b981' }} />
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f4f4f5', margin: 0 }}>Sesi Presensi QR Aktif</h3>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f4f4f5', margin: 0 }}>Sesi Presensi Terbroadcast</h3>
               </div>
 
-              <div style={{ background: '#18181b', padding: '1rem', borderRadius: '12px', border: '1px solid #27272a', marginBottom: '1rem', width: '100%', textAlign: 'center' }}>
-                <h4 style={{ margin: 0, fontSize: '0.95rem', color: '#ffffff', fontWeight: 700 }}>{activeSession.title}</h4>
-                <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.75rem', color: '#a1a1aa' }}>
-                  Dibuka pada: {new Date(activeSession.opened_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
-                </p>
+              <div style={{ background: '#18181b', padding: '1.25rem', borderRadius: '12px', border: '1px solid #27272a', marginBottom: '1.5rem' }}>
+                <div style={{ fontSize: '0.72rem', color: '#a1a1aa', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>Topik / Kegiatan KKN</div>
+                <h4 style={{ margin: '0.25rem 0 0.75rem 0', fontSize: '1.05rem', color: '#ffffff', fontWeight: 800 }}>{activeSession.title}</h4>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', paddingTop: '0.75rem', borderTop: '1px solid #27272a' }}>
+                  <div>
+                    <span style={{ fontSize: '0.7rem', color: '#71717a', display: 'block' }}>Jadwal Hari:</span>
+                    <span style={{ fontSize: '0.85rem', color: '#f4f4f5', fontWeight: 700 }}>{activeSession.day || 'Hari Ini'}</span>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '0.7rem', color: '#71717a', display: 'block' }}>Batas Waktu:</span>
+                    <span style={{ fontSize: '0.85rem', color: '#ef4444', fontWeight: 700 }}>s/d {activeSession.time_end || 'Selesai'}</span>
+                  </div>
+                </div>
               </div>
 
-              <div className="qr-code-scanner-container fullscreen-qr" style={{ width: '240px', height: '240px', margin: '0.5rem auto 1.5rem auto', position: 'relative' }}>
-                <div className="qr-laser-line" />
-                <svg className="qr-code-svg" viewBox="0 0 100 100" style={{ width: '100%', height: '100%', color: '#34d399' }}>
-                  <rect x="5" y="5" width="25" height="25" fill="none" stroke="currentColor" strokeWidth="4" />
-                  <rect x="10" y="10" width="15" height="15" fill="currentColor" />
-                  
-                  <rect x="70" y="5" width="25" height="25" fill="none" stroke="currentColor" strokeWidth="4" />
-                  <rect x="75" y="10" width="15" height="15" fill="currentColor" />
-                  
-                  <rect x="5" y="70" width="25" height="25" fill="none" stroke="currentColor" strokeWidth="4" />
-                  <rect x="10" y="75" width="15" height="15" fill="currentColor" />
-
-                  <rect x="40" y="10" width="8" height="8" fill="currentColor" />
-                  <rect x="52" y="15" width="8" height="12" fill="currentColor" />
-                  <rect x="10" y="40" width="12" height="8" fill="currentColor" />
-                  <rect x="40" y="40" width="18" height="18" fill="currentColor" />
-                  <rect x="70" y="40" width="8" height="15" fill="currentColor" />
-                  <rect x="82" y="48" width="10" height="10" fill="currentColor" />
-                  <rect x="40" y="70" width="12" height="8" fill="currentColor" />
-                  <rect x="56" y="78" width="18" height="8" fill="currentColor" />
-                  <rect x="80" y="70" width="12" height="12" fill="currentColor" />
-                </svg>
+              {/* Status Broadcast Animation Indicator */}
+              <div style={{ background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)', padding: '1rem', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
+                <span className="dot emerald sparkle-pulsing" style={{ width: '10px', height: '10px', background: '#10b981', borderRadius: '50%', display: 'inline-block' }} />
+                <div>
+                  <span style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 700, display: 'block' }}>Status: Sesi Aktif</span>
+                  <span style={{ fontSize: '0.72rem', color: '#a1a1aa' }}>Telah terkirim ke dashboard masing-masing mahasiswa.</span>
+                </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', width: '100%' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginTop: 'auto' }}>
                 <button 
                   type="button" 
                   onClick={handleCloseSession}
@@ -1738,9 +1732,6 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                   <XCircle size={18} />
                   <span>Akhiri / Tutup Sesi Presensi</span>
                 </button>
-                <span style={{ fontSize: '0.74rem', color: '#71717a', textAlign: 'center', display: 'block' }}>
-                  Mahasiswa dapat memindai QR ini atau mengeklik tombol presensi langsung di dashboard mereka.
-                </span>
               </div>
             </div>
 
