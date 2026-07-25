@@ -786,52 +786,9 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
 
         </div>
 
-        {/* Right Column: Time Clock Widget & Summary */}
+        {/* Right Column: Summary & Feeds */}
         <div className="attendance-right-column">
           
-          {/* Absensi Scan QR Code Card */}
-          <div className="right-widget-card qr-attendance-widget">
-            <h4 className="widget-title">Absensi QR Code</h4>
-            
-            <div className="qr-code-scanner-container" onClick={() => setIsFullscreenQR(true)} style={{ cursor: 'pointer' }} title="Klik untuk memperbesar QR Code">
-              <div className="qr-laser-line" />
-              <svg className="qr-code-svg" viewBox="0 0 100 100">
-                <rect x="5" y="5" width="25" height="25" fill="none" stroke="currentColor" strokeWidth="4" />
-                <rect x="10" y="10" width="15" height="15" fill="currentColor" />
-                
-                <rect x="70" y="5" width="25" height="25" fill="none" stroke="currentColor" strokeWidth="4" />
-                <rect x="75" y="10" width="15" height="15" fill="currentColor" />
-                
-                <rect x="5" y="70" width="25" height="25" fill="none" stroke="currentColor" strokeWidth="4" />
-                <rect x="10" y="75" width="15" height="15" fill="currentColor" />
-
-                {/* Simulated randomized QR blocks */}
-                <rect x="40" y="10" width="8" height="8" fill="currentColor" />
-                <rect x="52" y="15" width="8" height="12" fill="currentColor" />
-                <rect x="10" y="40" width="12" height="8" fill="currentColor" />
-                <rect x="40" y="40" width="18" height="18" fill="currentColor" />
-                <rect x="70" y="40" width="8" height="15" fill="currentColor" />
-                <rect x="82" y="48" width="10" height="10" fill="currentColor" />
-                <rect x="40" y="70" width="12" height="8" fill="currentColor" />
-                <rect x="56" y="78" width="18" height="8" fill="currentColor" />
-                <rect x="80" y="70" width="12" height="12" fill="currentColor" />
-              </svg>
-            </div>
-            
-            <span className="qr-desc" style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', textAlign: 'center', marginTop: '0.5rem', display: 'block' }}>
-              Klik gambar untuk Tampilkan Layar Penuh
-            </span>
-
-            <button 
-              type="button" 
-              className="btn-clock-out" 
-              onClick={() => setQrCounter(60)}
-              style={{ width: '100%', marginTop: '0.75rem', borderColor: 'var(--color-primary-blue)', color: 'var(--color-primary-blue)' }}
-            >
-              <span>Perbarui Kode QR ({qrCounter}s)</span>
-            </button>
-          </div>
-
           {/* Today's Summary (Compact Donut Chart Layout) */}
           <div className="right-widget-card">
             <h4 className="widget-title">Ringkasan Hari Ini</h4>
