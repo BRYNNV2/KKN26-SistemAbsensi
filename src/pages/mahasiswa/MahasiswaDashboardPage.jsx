@@ -24,7 +24,7 @@ import MahasiswaSidebar from '../../components/mahasiswa/MahasiswaSidebar';
 import MahasiswaTopbar from '../../components/mahasiswa/MahasiswaTopbar';
 import { supabase } from '../../lib/supabase';
 
-export default function MahasiswaDashboardPage({ user, onLogout, onSwitchRole }) {
+export default function MahasiswaDashboardPage({ user, onLogout }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard', 'schedules', 'logbook', 'history', 'settings'
 
@@ -235,7 +235,7 @@ export default function MahasiswaDashboardPage({ user, onLogout, onSwitchRole })
       <div className="admin-main-wrapper" style={{ marginLeft: sidebarCollapsed ? '78px' : '250px' }}>
         
         {/* Topbar */}
-        <MahasiswaTopbar user={user} onSwitchRole={onSwitchRole} />
+        <MahasiswaTopbar user={user} />
 
         {/* Content Views */}
         <main style={{ padding: '1.75rem' }}>

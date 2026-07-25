@@ -37,12 +37,6 @@ export default function App() {
   // Called when user completes authentication
   const handleLoginSuccess = (userObj) => {
     setCurrentUser(userObj);
-    // Auto set viewMode based on user role if available
-    if (userObj?.role === 'student' || userObj?.role === 'mahasiswa') {
-      setViewMode('mahasiswa');
-    } else {
-      setViewMode('admin');
-    }
     handleNavigate('dashboard');
   };
 
@@ -52,18 +46,18 @@ export default function App() {
     handleNavigate('login');
   };
 
-  const toggleViewMode = () => {
-    setViewMode(prev => (prev === 'admin' ? 'mahasiswa' : 'admin'));
-  };
-
   // Render Dashboard Page when authenticated
   if (currentPage === 'dashboard') {
-    if (viewMode === 'mahasiswa') {
+    const isMahasiswa = currentUser?.role === 'mahasiswa' || 
+                        currentUser?.role === 'student' || 
+                        currentUser?.role === 'user' ||
+                        (currentUser?.email && !currentUser.email.includes('admin') && !currentUser.email.includes('dosen'));
+
+    if (isMahasiswa) {
       return (
         <MahasiswaDashboardPage 
           user={currentUser} 
           onLogout={handleLogout} 
-          onSwitchRole={toggleViewMode}
         />
       );
     }
@@ -72,7 +66,6 @@ export default function App() {
       <AdminDashboardPage 
         user={currentUser} 
         onLogout={handleLogout} 
-        onSwitchRole={toggleViewMode}
       />
     );
   }

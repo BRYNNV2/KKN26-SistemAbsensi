@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Bell, MessageSquare, ChevronDown, User, LogOut, Sun, Moon } from 'lucide-react';
 
-export default function AdminTopbar({ user, onLogout, theme = 'light', onToggleTheme, onSwitchRole }) {
+export default function AdminTopbar({ user, onLogout, theme = 'light', onToggleTheme }) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   return (
@@ -25,29 +25,6 @@ export default function AdminTopbar({ user, onLogout, theme = 'light', onToggleT
 
       {/* Right Controls */}
       <div className="topbar-right-controls">
-        {onSwitchRole && (
-          <button
-            type="button"
-            onClick={onSwitchRole}
-            style={{
-              background: 'linear-gradient(135deg, #065f46 0%, #064e3b 100%)',
-              border: '1px solid #10b981',
-              color: '#34d399',
-              padding: '0.45rem 0.85rem',
-              borderRadius: '20px',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              cursor: 'pointer',
-              boxShadow: '0 2px 10px rgba(0, 0, 0, 0.4)'
-            }}
-            title="Beralih ke Tampilan Mahasiswa"
-          >
-            <span>Switch ke Mode Mahasiswa</span>
-          </button>
-        )}
         {/* Dark Mode / Light Mode Sun & Moon Toggle Button */}
         <button 
           type="button" 

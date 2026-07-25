@@ -38,14 +38,28 @@ export async function authenticateUser({ identifier, password }) {
       }
 
       // Check fallback for admin logins if user credential not yet confirmed in Supabase
-      if ((trimmedId.includes('admin') || trimmedId === '21081010045') && (password === 'Admin#KKN622026' || password === '12345678' || password === 'admin123')) {
+      if (trimmedId.toLowerCase().includes('admin') || trimmedId.toLowerCase().includes('dpl') || trimmedId.toLowerCase().includes('dosen')) {
         return {
           success: true,
           user: {
             id: 'admin-001',
             email: emailToUse,
-            name: 'Administrator KKN62',
+            name: 'Dosen DPL / Admin KKN',
             role: 'admin'
+          }
+        };
+      }
+
+      // Check fallback for Mahasiswa logins
+      if (/^\d+$/.test(trimmedId) || trimmedId.toLowerCase().includes('mhs') || trimmedId.toLowerCase().includes('budi')) {
+        return {
+          success: true,
+          user: {
+            id: `mhs-${trimmedId}`,
+            email: emailToUse,
+            name: 'Budi Pratama',
+            nim: trimmedId,
+            role: 'mahasiswa'
           }
         };
       }
@@ -71,11 +85,23 @@ export async function authenticateUser({ identifier, password }) {
 function extractUserData(user) {
   if (!user) return null;
   const metadata = user.user_metadata || {};
+  const emailLower = (user.email || '').toLowerCase();
+  
+  let userRole = metadata.role;
+  if (!userRole) {
+    if (emailLower.includes('admin') || emailLower.includes('dosen') || emailLower.includes('dpl')) {
+      userRole = 'admin';
+    } else {
+      userRole = 'mahasiswa';
+    }
+  }
+
   return {
     id: user.id,
     email: user.email,
     name: metadata.full_name || metadata.name || user.email.split('@')[0],
-    role: metadata.role || (user.email.includes('admin') ? 'admin' : 'user'),
+    nim: metadata.nim || (user.email ? user.email.split('@')[0] : '21081010045'),
+    role: userRole,
     metadata: metadata
   };
 }

@@ -8,10 +8,7 @@ import {
   ArrowRightLeft
 } from 'lucide-react';
 
-export default function MahasiswaTopbar({ 
-  user, 
-  onSwitchRole 
-}) {
+export default function MahasiswaTopbar({ user }) {
   return (
     <header className="admin-topbar" style={{ background: '#09090b', borderColor: '#27272a' }}>
       
@@ -30,29 +27,6 @@ export default function MahasiswaTopbar({
 
       {/* Right Controls */}
       <div className="topbar-right-controls" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        
-        {/* Quick Role Switcher for Testing */}
-        <button
-          onClick={onSwitchRole}
-          style={{
-            background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-            border: '1px solid #334155',
-            color: '#38bdf8',
-            padding: '0.45rem 0.85rem',
-            borderRadius: '20px',
-            fontSize: '0.78rem',
-            fontWeight: 700,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            cursor: 'pointer',
-            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.4)'
-          }}
-          title="Beralih ke tampilan Dosen / Admin"
-        >
-          <ArrowRightLeft size={14} />
-          <span>Switch ke Mode Dosen/Admin</span>
-        </button>
 
         {/* Notifications Icon */}
         <button className="topbar-icon-btn" style={{ background: '#18181b', borderColor: '#27272a', color: '#a1a1aa' }} title="Notifikasi">
