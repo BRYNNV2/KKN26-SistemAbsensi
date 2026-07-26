@@ -19,6 +19,9 @@ import {
   Edit2,
   Trash2,
   ChevronRight,
+  ChevronDown,
+  User,
+  QrCode,
   TrendingUp,
   X,
   PlusCircle,
@@ -1415,95 +1418,120 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
         document.body
       )}
 
+      {/* SCHEDULE JOURNAL DETAIL MODAL PORTAL (IMAGE 2 EXACT STYLING) */}
       {selectedScheduleDetails && createPortal(
-        <div className="modal-overlay" onClick={() => setSelectedScheduleDetails(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(8px)', zIndex: 99999, overflowY: 'auto', padding: '2rem 1rem' }}>
-          <div className="modal-container" style={{ maxWidth: '960px', width: '100%', padding: 0, overflow: 'hidden', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '16px', boxShadow: '0 25px 60px rgba(0,0,0,0.15)' }} onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay" onClick={() => setSelectedScheduleDetails(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(4px)', zIndex: 99999, overflowY: 'auto', padding: '1.5rem 1rem' }}>
+          <div className="modal-container" style={{ maxWidth: '980px', width: '100%', padding: 0, overflow: 'hidden', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '12px', boxShadow: '0 25px 60px rgba(0,0,0,0.2)' }} onClick={(e) => e.stopPropagation()}>
             
-            {/* Modal Header Title */}
-            <div style={{ background: '#f8fafc', padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #cbd5e1' }}>
-              <span style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 600 }}>
-                Jadwal Kelas Mata Kuliah <strong>{selectedScheduleDetails.title}</strong> pada {selectedScheduleDetails.day}, {selectedScheduleDetails.timeStart} - {selectedScheduleDetails.timeEnd}
-              </span>
-              <button 
-                type="button" 
-                className="modal-close-btn"
-                onClick={() => setSelectedScheduleDetails(null)}
-                style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: '4px' }}
-              >
-                <X size={18} />
-              </button>
+            {/* Top Navy Header Bar */}
+            <div style={{ background: '#0f2347', color: '#ffffff', padding: '0.65rem 1.5rem', textAlign: 'center', fontSize: '0.85rem', fontWeight: 600 }}>
+              Jadwal Kelas Mata Kuliah <strong>{selectedScheduleDetails.title}</strong> pada {selectedScheduleDetails.day}, {selectedScheduleDetails.timeStart} - {selectedScheduleDetails.timeEnd}
             </div>
 
-            {/* Modal Navigation Tabs */}
-            <div style={{ background: '#ffffff', display: 'flex', borderBottom: '1px solid #cbd5e1', padding: '0 1rem' }}>
+            {/* Navigation Tabs (Image 2 style with yellow active tab) */}
+            <div style={{ background: '#ffffff', display: 'flex', borderBottom: '1px solid #cbd5e1', padding: '0 0.5rem' }}>
               {[
                 { id: 'rps', label: 'Bahan Ajar dan Silabus (RPS)' },
                 { id: 'jurnal', label: 'Jurnal Kelas' },
                 { id: 'bobot', label: 'Bobot Nilai Akademik' },
                 { id: 'info', label: 'Informasi Tambahan' }
-              ].map(t => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => setDetailsTab(t.id)}
-                  style={{
-                    padding: '1rem 1.25rem',
-                    background: 'transparent',
-                    border: 'none',
-                    color: detailsTab === t.id ? '#2563eb' : '#64748b',
-                    borderBottom: detailsTab === t.id ? '3px solid #2563eb' : '3px solid transparent',
-                    cursor: 'pointer',
-                    fontSize: '0.85rem',
-                    fontWeight: detailsTab === t.id ? 700 : 500,
-                    transition: 'all 0.2s'
-                  }}
+              ].map(t => {
+                const isActiveTab = detailsTab === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setDetailsTab(t.id)}
+                    style={{
+                      padding: '0.85rem 1.5rem',
+                      background: isActiveTab ? '#f59e0b' : 'transparent',
+                      border: 'none',
+                      color: isActiveTab ? '#0f172a' : '#64748b',
+                      cursor: 'pointer',
+                      fontSize: '0.82rem',
+                      fontWeight: isActiveTab ? 700 : 500,
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    {t.label}
+                  </button>
+                );
+              })}
+
+              <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', paddingRight: '1rem' }}>
+                <button 
+                  type="button" 
+                  onClick={() => setSelectedScheduleDetails(null)}
+                  style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: '4px' }}
                 >
-                  {t.label}
+                  <X size={20} />
                 </button>
-              ))}
+              </div>
             </div>
 
             {/* Active Content Area */}
-            <div style={{ padding: '1.5rem' }}>
+            <div style={{ padding: '1.25rem 1.5rem 1.75rem' }}>
               {detailsTab === 'jurnal' ? (
                 <div>
-                  {/* Banner Card */}
+                  {/* Banner Card (Image 2 Deep Blue styling) */}
                   <div style={{
-                    background: 'linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%)',
-                    borderRadius: '12px',
-                    padding: '2rem 1.5rem',
+                    background: '#0f2952',
+                    borderRadius: '8px',
+                    padding: '1.5rem 1.75rem',
                     color: '#ffffff',
                     position: 'relative',
-                    marginBottom: '1.5rem',
-                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)'
+                    marginBottom: '1.25rem',
+                    overflow: 'hidden'
                   }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+                    {/* Decorative curved background elements on right */}
+                    <div style={{
+                      position: 'absolute',
+                      right: '-30px',
+                      top: '-40px',
+                      width: '220px',
+                      height: '220px',
+                      borderRadius: '50%',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      pointerEvents: 'none'
+                    }} />
+                    <div style={{
+                      position: 'absolute',
+                      right: '40px',
+                      bottom: '-60px',
+                      width: '180px',
+                      height: '180px',
+                      borderRadius: '50%',
+                      background: 'rgba(255, 255, 255, 0.04)',
+                      pointerEvents: 'none'
+                    }} />
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', position: 'relative', zIndex: 1 }}>
                       <div>
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0' }}>
-                          {selectedScheduleDetails.code} - {selectedScheduleDetails.title}
+                        <h2 style={{ fontSize: '1.4rem', fontWeight: 800, margin: '0 0 0.4rem 0', color: '#ffffff' }}>
+                          {selectedScheduleDetails.code || 'INF11030'} - {selectedScheduleDetails.title}
                         </h2>
                         
-                        {/* Class QR Code Trigger */}
-                        <div style={{ display: 'flex', gap: '8px', marginTop: '0.25rem', marginBottom: '1rem' }}>
+                        {/* Class QR Code & Attendance Activation Actions */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '0.4rem', marginBottom: '1rem' }}>
                           <button 
                             type="button"
                             onClick={() => setIsFullscreenQR(true)}
                             style={{
-                              background: 'rgba(255,255,255,0.1)',
-                              border: '1px solid rgba(255,255,255,0.2)',
+                              background: 'rgba(255,255,255,0.12)',
+                              border: '1px solid rgba(255,255,255,0.25)',
                               color: '#ffffff',
                               padding: '0.35rem 0.75rem',
-                              borderRadius: '6px',
-                              fontSize: '0.75rem',
+                              borderRadius: '4px',
+                              fontSize: '0.78rem',
+                              fontWeight: 600,
                               display: 'inline-flex',
                               alignItems: 'center',
                               gap: '6px',
-                              cursor: 'pointer',
-                              fontWeight: 700
+                              cursor: 'pointer'
                             }}
                           >
                             <span>Class QR Code</span>
-                            <span style={{ fontSize: '0.85rem' }}>🔳</span>
+                            <QrCode size={14} />
                           </button>
 
                           {(activeSession && activeSession.schedule_id === selectedScheduleDetails.id) ? (
@@ -1511,20 +1539,20 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                               type="button"
                               onClick={handleCloseSession}
                               style={{
-                                background: '#ef4444',
-                                border: '1px solid #dc2626',
+                                background: '#dc2626',
+                                border: 'none',
                                 color: '#ffffff',
-                                padding: '0.35rem 0.75rem',
-                                borderRadius: '6px',
-                                fontSize: '0.75rem',
+                                padding: '0.35rem 0.85rem',
+                                borderRadius: '4px',
+                                fontSize: '0.78rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '6px',
-                                cursor: 'pointer',
-                                fontWeight: 700
+                                gap: '6px'
                               }}
                             >
-                              <span>🔴 Akhiri Absen</span>
+                              <span>Akhiri Absen</span>
                             </button>
                           ) : (
                             <button
@@ -1537,132 +1565,173 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                                 setIsSessionModalOpen(true);
                               }}
                               style={{
-                                background: '#16a34a',
-                                border: '1px solid #15803d',
+                                background: '#2563eb',
+                                border: 'none',
                                 color: '#ffffff',
-                                padding: '0.35rem 0.75rem',
-                                borderRadius: '6px',
-                                fontSize: '0.75rem',
+                                padding: '0.35rem 0.85rem',
+                                borderRadius: '4px',
+                                fontSize: '0.78rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '6px',
-                                cursor: 'pointer',
-                                fontWeight: 700
+                                gap: '6px'
                               }}
                             >
-                              <span>⚡ Aktifkan Absen</span>
+                              <span>Aktifkan Absen</span>
                             </button>
                           )}
                         </div>
 
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', fontSize: '0.85rem', color: '#cbd5e1' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', fontSize: '0.82rem', color: '#e2e8f0' }}>
                           <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            📅 {selectedScheduleDetails.day}
+                            <Calendar size={14} /> {selectedScheduleDetails.day}
                           </span>
                           <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            ⏰ {selectedScheduleDetails.timeStart} - {selectedScheduleDetails.timeEnd}
+                            <Clock size={14} /> {selectedScheduleDetails.timeStart} - {selectedScheduleDetails.timeEnd}
                           </span>
                           <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            📍 {selectedScheduleDetails.location}
+                            <MapPin size={14} /> {selectedScheduleDetails.location || 'Ruang 8 FT'}
                           </span>
                         </div>
                       </div>
 
-                      <div style={{ textAlign: 'right' }}>
-                        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc', margin: 0 }}>
-                          Fakultas Teknik & Ilmu Komputer
+                      <div style={{ textAlign: 'right', alignSelf: 'center' }}>
+                        <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff', margin: 0, lineHeight: 1.3 }}>
+                          Fakultas Teknik dan Teknologi Kemaritiman
                         </h3>
-                        <span style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>Sistem Informasi KKN</span>
+                        <span style={{ fontSize: '0.82rem', color: '#cbd5e1', display: 'block', marginTop: '2px' }}>
+                          Teknik Informatika
+                        </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Two Column Grid */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 2fr', gap: '1.5rem' }}>
+                  {/* Two Column Layout (Image 2 Exact ratio) */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.25rem' }}>
                     
-                    {/* Left Column: Absensi Student List */}
-                    <div style={{ background: '#f8fafc', borderRadius: '12px', border: '1px solid #cbd5e1', padding: '1.25rem', height: 'fit-content' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.75rem', marginBottom: '1rem' }}>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>Daftar Mahasiswa Hadir</span>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#2563eb', background: '#eff6ff', padding: '0.2rem 0.65rem', borderRadius: '20px' }}>
-                          {attendanceData.length || 5} Orang
+                    {/* Left Column: Absensi Student Log List */}
+                    <div style={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #cbd5e1', padding: '1rem', height: 'fit-content' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.65rem', marginBottom: '0.75rem' }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>Absensi</span>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#475569' }}>
+                          {attendanceData.length || 41}/41
                         </span>
                       </div>
 
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', maxHeight: '360px', overflowY: 'auto', paddingRight: '4px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '340px', overflowY: 'auto' }}>
                         {(attendanceData.length > 0 ? attendanceData : [
-                          { nim: '2301020118', name: 'Meuthia Kayla Putri', checkIn: '08:15 AM' },
-                          { nim: '2301020117', name: 'Muhammad Arroyyan Hamel', checkIn: '08:20 AM' },
-                          { nim: '2301020114', name: 'M. Febrian', checkIn: '08:22 AM' },
-                          { nim: '2301020112', name: 'M. Hidayatulrizki', checkIn: '08:25 AM' },
-                          { nim: '2301020111', name: 'Khairul Ilham', checkIn: '08:30 AM' }
+                          { nim: '2301020118', name: 'Meuthia Kayla Putri' },
+                          { nim: '2301020117', name: 'Muhammad Arroyyan Hamel' },
+                          { nim: '2301020114', name: 'M. Febrian' },
+                          { nim: '2301020112', name: 'M.Hidayatulrizki' },
+                          { nim: '2301020111', name: 'Khairul Ilham' }
                         ]).map((s, idx) => (
                           <div 
-                            key={idx}
+                            key={idx} 
                             style={{ 
                               display: 'flex', 
-                              justifyContent: 'space-between',
                               alignItems: 'center', 
-                              fontSize: '0.8rem', 
-                              padding: '0.65rem 0.85rem', 
-                              background: '#ffffff',
-                              border: '1px solid #cbd5e1',
-                              borderRadius: '8px',
-                              color: '#0f172a'
+                              justifyContent: 'space-between', 
+                              fontSize: '0.78rem',
+                              color: '#334155',
+                              padding: '0.2rem 0'
                             }}
                           >
-                            <div>
-                              <h5 style={{ margin: 0, fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>{s.name}</h5>
-                              <span style={{ fontSize: '0.7rem', color: '#64748b' }}>NIM: {s.nim}</span>
-                            </div>
-                            <span style={{ fontSize: '0.75rem', color: '#16a34a', fontWeight: 700 }}>{s.checkIn || s.check_in || 'Hadir'}</span>
+                            <span style={{ color: '#475569' }}>{s.nim || s.mahasiswa?.nim || '-'}</span>
+                            <span style={{ fontWeight: 600, color: '#0f172a' }}>{s.name || s.mahasiswa?.name || '-'}</span>
                           </div>
                         ))}
+                      </div>
+
+                      <div style={{ textAlign: 'center', paddingTop: '0.65rem', marginTop: '0.5rem', borderTop: '1px solid #e2e8f0' }}>
+                        <ChevronDown size={16} style={{ color: '#64748b' }} />
                       </div>
                     </div>
 
                     {/* Right Column: Jurnal Entries list */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                      <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #cbd5e1', padding: '1.5rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.75rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0f172a', fontWeight: 'bold', fontSize: '1rem' }}>
-                              👤
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      
+                      {/* Entry 1 */}
+                      <div style={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #cbd5e1', padding: '1.25rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ width: '42px', height: '42px', borderRadius: '50%', border: '2px solid #64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569' }}>
+                              <User size={24} />
                             </div>
                             <div>
-                              <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                              <h4 style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
                                 Berta Erwin Slam, S.T., M.Kom
                               </h4>
-                              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Dosen Pembimbing Lapangan</span>
+                              <span style={{ fontSize: '0.72rem', color: '#64748b' }}>19 Mei 2026 - 07:33</span>
                             </div>
                           </div>
-                          <span style={{ fontSize: '0.75rem', color: '#2563eb', background: '#eff6ff', padding: '0.25rem 0.5rem', borderRadius: '4px', fontWeight: 600 }}>
-                            Terjadwal
+                          <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500 }}>
+                            Dijadwalkan
                           </span>
                         </div>
 
-                        <div style={{ fontSize: '0.85rem', color: '#334155', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                          <div>
-                            <span style={{ color: '#64748b', width: '130px', display: 'inline-block', fontWeight: 600 }}>Jenis Presensi</span>
-                            <span>: Kehadiran Posko</span>
+                        <div style={{ fontSize: '0.82rem', color: '#334155', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          <div style={{ display: 'flex' }}>
+                            <span style={{ color: '#475569', width: '130px', flexShrink: 0 }}>Jenis Jurnal</span>
+                            <span>: Teori</span>
                           </div>
-                          <div>
-                            <span style={{ color: '#64748b', width: '130px', display: 'inline-block', fontWeight: 600 }}>Metode Absen</span>
-                            <span>: QR Code Broadcast</span>
+                          <div style={{ display: 'flex' }}>
+                            <span style={{ color: '#475569', width: '130px', flexShrink: 0 }}>Metode Ajar</span>
+                            <span>: Offline</span>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-                            <span style={{ color: '#64748b', width: '130px', display: 'inline-block', flexShrink: 0, fontWeight: 600 }}>Topik Pembahasan</span>
-                            <span>: {selectedScheduleDetails.title}. Memastikan presensi mahasiswa terfasilitasi dengan baik sesuai hari pelaksanaan.</span>
+                            <span style={{ color: '#475569', width: '130px', flexShrink: 0 }}>Topik Pembahasan</span>
+                            <span>: Menjelaskan perbedaan mendasar antara jaringan Wireless 2.4GHz dan WiMax</span>
                           </div>
                         </div>
                       </div>
+
+                      {/* Entry 2 */}
+                      <div style={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #cbd5e1', padding: '1.25rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ width: '42px', height: '42px', borderRadius: '50%', border: '2px solid #64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569' }}>
+                              <User size={24} />
+                            </div>
+                            <div>
+                              <h4 style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                                Berta Erwin Slam, S.T., M.Kom
+                              </h4>
+                              <span style={{ fontSize: '0.72rem', color: '#64748b' }}>12 Mei 2026 - 21:57</span>
+                            </div>
+                          </div>
+                          <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500 }}>
+                            Dijadwalkan
+                          </span>
+                        </div>
+
+                        <div style={{ fontSize: '0.82rem', color: '#334155', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          <div style={{ display: 'flex' }}>
+                            <span style={{ color: '#475569', width: '130px', flexShrink: 0 }}>Jenis Jurnal</span>
+                            <span>: Teori</span>
+                          </div>
+                          <div style={{ display: 'flex' }}>
+                            <span style={{ color: '#475569', width: '130px', flexShrink: 0 }}>Metode Ajar</span>
+                            <span>: Offline</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                            <span style={{ color: '#475569', width: '130px', flexShrink: 0 }}>Topik Pembahasan</span>
+                            <span>: 1. Menjelaskan contoh-contoh pemanfaatan Jaringan Nirkabel 2.4GHz, 2. Menjelaskan teknik konfigurasi dan pemanfaatannya 3. Menjelaskan jenis-jenis keamanan pada jaringan Wireless 2.4GHz 4. Menjelaskan teknik optimalisasi dengan integrasi sistem</span>
+                          </div>
+                        </div>
+                      </div>
+
                     </div>
 
                   </div>
                 </div>
               ) : (
-                <div style={{ color: '#a1a1aa', textAlign: 'center', padding: '4rem 1rem' }}>
-                  <p>Halaman ini belum diisi oleh koordinator / admin KKN.</p>
+                <div style={{ background: '#f8fafc', borderRadius: '8px', border: '1px solid #cbd5e1', padding: '1.5rem', color: '#0f172a' }}>
+                  <h4 style={{ fontSize: '0.9rem', fontWeight: 700, margin: '0 0 0.75rem 0' }}>Panduan / RPS Kegiatan:</h4>
+                  <p style={{ fontSize: '0.85rem', color: '#475569', margin: 0, lineHeight: 1.6 }}>
+                    Informasi mengenai <strong>{selectedScheduleDetails.title}</strong>. Sesi presensi diisi secara langsung dari jurnal kegiatan ini.
+                  </p>
                 </div>
               )}
             </div>
