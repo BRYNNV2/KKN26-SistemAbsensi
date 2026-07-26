@@ -438,7 +438,7 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                       <span>PORTAL AKADEMIK MAHASISWA KKN62</span>
                     </div>
                     <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                      Selamat Datang, {user?.name || 'Mahasiswa'}! 👋
+                      Selamat Datang, {user?.name || 'Mahasiswa'}!
                     </h2>
                     <p style={{ color: '#475569', fontSize: '0.88rem', margin: '0.4rem 0 0 0' }}>
                       NIM: {user?.nim || '-'} • {user?.kelompok || 'Kelompok KKN'}
@@ -448,7 +448,7 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                   <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1rem 1.25rem', textAlign: 'right' }}>
                     <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Dosen Pembimbing Lapangan (DPL):</div>
                     <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
-                      {user?.metadata?.dosen_dpl || 'Dosen DPL'}
+                      {user?.metadata?.dosen_dpl || 'Dosen Pembimbing Lapangan'}
                     </div>
                   </div>
                 </div>
@@ -531,7 +531,7 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                         color: !isScheduleInputtedByDosen ? '#64748b' : (isCheckedIn ? '#166534' : '#92400e'),
                         border: !isScheduleInputtedByDosen ? '1px solid #cbd5e1' : (isCheckedIn ? '1px solid #bbf7d0' : '1px solid #fde68a')
                       }}>
-                        {!isScheduleInputtedByDosen ? 'SESI BELUM DIBUKA' : (isCheckedIn ? '● SUDAH ABSEN' : '○ BELUM ABSEN')}
+                        {!isScheduleInputtedByDosen ? 'SESI BELUM DIBUKA' : (isCheckedIn ? 'SUDAH ABSEN' : 'BELUM ABSEN')}
                       </span>
                     </div>
 
@@ -548,11 +548,11 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                         </p>
                       </div>
                     ) : (
-                      <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '1rem', textAlign: 'center', marginBottom: '1.5rem' }}>
-                        <span style={{ fontSize: '0.82rem', color: '#166534', fontWeight: 800, display: 'block' }}>
-                          📢 SESI PRESENSI AKTIF: {activeSession?.title}
+                      <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '12px', padding: '1rem', textAlign: 'center', marginBottom: '1.5rem' }}>
+                        <span style={{ fontSize: '0.82rem', color: '#1e40af', fontWeight: 800, display: 'block' }}>
+                          SESI PRESENSI AKTIF: {activeSession?.title}
                         </span>
-                        <span style={{ fontSize: '0.74rem', color: '#15803d', display: 'block', marginTop: '0.3rem', fontWeight: 600 }}>
+                        <span style={{ fontSize: '0.74rem', color: '#2563eb', display: 'block', marginTop: '0.3rem', fontWeight: 600 }}>
                           Hari: {activeSession?.day || 'Hari Ini'} • Batas Jam Absen: s/d {activeSession?.time_end || 'Selesai'}
                         </span>
                       </div>
@@ -571,7 +571,7 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                         border: 'none',
                         background: (!isScheduleInputtedByDosen || isCheckedIn) 
                           ? '#e2e8f0'
-                          : '#16a34a',
+                          : '#2563eb',
                         color: (!isScheduleInputtedByDosen || isCheckedIn) ? '#64748b' : '#ffffff',
                         fontSize: '0.9rem',
                         fontWeight: 700,
@@ -579,12 +579,11 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: '0.6rem',
-                        boxShadow: (isScheduleInputtedByDosen && !isCheckedIn) ? '0 2px 8px rgba(22,163,74,0.2)' : 'none'
+                        gap: '0.6rem'
                       }}
                     >
                       <CheckCircle2 size={19} />
-                      <span>{isCheckedIn ? '✓ PRESENSI HARI INI TELAH TERCATAT' : '📌 PRESENSI KEHADIRAN SEKARANG'}</span>
+                      <span>{isCheckedIn ? 'PRESENSI HARI INI TELAH TERCATAT' : 'PRESENSI KEHADIRAN SEKARANG'}</span>
                     </button>
 
                     <button
@@ -616,8 +615,8 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                 <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.75rem', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                   <div style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem', marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                      <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Jadwal KKN Diinput Dosen</h3>
-                      <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Agenda kegiatan & supervisi resmi posko</span>
+                      <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Riwayat & Kartu Jadwal Absensi</h3>
+                      <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Daftar kartu agenda kegiatan & riwayat presensi KKN</span>
                     </div>
                     <span style={{ fontSize: '0.75rem', color: '#334155', background: '#f1f5f9', padding: '0.3rem 0.65rem', borderRadius: '12px', fontWeight: 700, border: '1px solid #e2e8f0' }}>
                       {schedules.length} Agenda
