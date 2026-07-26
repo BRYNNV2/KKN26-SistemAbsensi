@@ -1615,33 +1615,33 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.65rem', marginBottom: '0.75rem' }}>
                         <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>Absensi</span>
                         <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#475569' }}>
-                          {attendanceData.length || 41}/41
+                          {attendanceData.length}/41
                         </span>
                       </div>
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '340px', overflowY: 'auto' }}>
-                        {(attendanceData.length > 0 ? attendanceData : [
-                          { nim: '2301020118', name: 'Meuthia Kayla Putri' },
-                          { nim: '2301020117', name: 'Muhammad Arroyyan Hamel' },
-                          { nim: '2301020114', name: 'M. Febrian' },
-                          { nim: '2301020112', name: 'M.Hidayatulrizki' },
-                          { nim: '2301020111', name: 'Khairul Ilham' }
-                        ]).map((s, idx) => (
-                          <div 
-                            key={idx} 
-                            style={{ 
-                              display: 'flex', 
-                              alignItems: 'center', 
-                              justifyContent: 'space-between', 
-                              fontSize: '0.78rem',
-                              color: '#334155',
-                              padding: '0.2rem 0'
-                            }}
-                          >
-                            <span style={{ color: '#475569' }}>{s.nim || s.mahasiswa?.nim || '-'}</span>
-                            <span style={{ fontWeight: 600, color: '#0f172a' }}>{s.name || s.mahasiswa?.name || '-'}</span>
+                        {attendanceData.length > 0 ? (
+                          attendanceData.map((s, idx) => (
+                            <div 
+                              key={idx} 
+                              style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'space-between', 
+                                fontSize: '0.78rem',
+                                color: '#334155',
+                                padding: '0.2rem 0'
+                              }}
+                            >
+                              <span style={{ color: '#475569' }}>{s.nim || s.mahasiswa?.nim || '-'}</span>
+                              <span style={{ fontWeight: 600, color: '#0f172a' }}>{s.name || s.mahasiswa?.name || '-'}</span>
+                            </div>
+                          ))
+                        ) : (
+                          <div style={{ textAlign: 'center', padding: '2rem 0.5rem', color: '#64748b', fontSize: '0.78rem' }}>
+                            Belum ada mahasiswa yang hadir.
                           </div>
-                        ))}
+                        )}
                       </div>
 
                       <div style={{ textAlign: 'center', paddingTop: '0.65rem', marginTop: '0.5rem', borderTop: '1px solid #e2e8f0' }}>
@@ -1649,75 +1649,41 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                       </div>
                     </div>
 
-                    {/* Right Column: Jurnal Entries list */}
+                    {/* Right Column: Dynamic Jurnal Entries */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                       
-                      {/* Entry 1 */}
                       <div style={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #cbd5e1', padding: '1.25rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ width: '42px', height: '42px', borderRadius: '50%', border: '2px solid #64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569' }}>
-                              <User size={24} />
+                            <div style={{ width: '42px', height: '42px', borderRadius: '50%', border: '2px solid #2563eb', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb' }}>
+                              <User size={22} />
                             </div>
                             <div>
                               <h4 style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                                Berta Erwin Slam, S.T., M.Kom
+                                {user?.name || user?.user_metadata?.full_name || selectedScheduleDetails?.dosen || 'Dosen Pembimbing Lapangan'}
                               </h4>
-                              <span style={{ fontSize: '0.72rem', color: '#64748b' }}>19 Mei 2026 - 07:33</span>
+                              <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                                {selectedScheduleDetails?.day}, {selectedScheduleDetails?.timeStart} - {selectedScheduleDetails?.timeEnd}
+                              </span>
                             </div>
                           </div>
-                          <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500 }}>
-                            Dijadwalkan
+                          <span style={{ fontSize: '0.75rem', color: '#2563eb', background: '#eff6ff', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 600 }}>
+                            {activeSession && activeSession.schedule_id === selectedScheduleDetails.id ? 'Aktif' : 'Dijadwalkan'}
                           </span>
                         </div>
 
                         <div style={{ fontSize: '0.82rem', color: '#334155', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                           <div style={{ display: 'flex' }}>
                             <span style={{ color: '#475569', width: '130px', flexShrink: 0 }}>Jenis Jurnal</span>
-                            <span>: Teori</span>
+                            <span>: Presensi Kegiatan KKN</span>
                           </div>
                           <div style={{ display: 'flex' }}>
-                            <span style={{ color: '#475569', width: '130px', flexShrink: 0 }}>Metode Ajar</span>
-                            <span>: Offline</span>
+                            <span style={{ color: '#475569', width: '130px', flexShrink: 0 }}>Metode Absen</span>
+                            <span>: QR Code Broadcast</span>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'flex-start' }}>
                             <span style={{ color: '#475569', width: '130px', flexShrink: 0 }}>Topik Pembahasan</span>
-                            <span>: Menjelaskan perbedaan mendasar antara jaringan Wireless 2.4GHz dan WiMax</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Entry 2 */}
-                      <div style={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #cbd5e1', padding: '1.25rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ width: '42px', height: '42px', borderRadius: '50%', border: '2px solid #64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569' }}>
-                              <User size={24} />
-                            </div>
-                            <div>
-                              <h4 style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                                Berta Erwin Slam, S.T., M.Kom
-                              </h4>
-                              <span style={{ fontSize: '0.72rem', color: '#64748b' }}>12 Mei 2026 - 21:57</span>
-                            </div>
-                          </div>
-                          <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 500 }}>
-                            Dijadwalkan
-                          </span>
-                        </div>
-
-                        <div style={{ fontSize: '0.82rem', color: '#334155', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                          <div style={{ display: 'flex' }}>
-                            <span style={{ color: '#475569', width: '130px', flexShrink: 0 }}>Jenis Jurnal</span>
-                            <span>: Teori</span>
-                          </div>
-                          <div style={{ display: 'flex' }}>
-                            <span style={{ color: '#475569', width: '130px', flexShrink: 0 }}>Metode Ajar</span>
-                            <span>: Offline</span>
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-                            <span style={{ color: '#475569', width: '130px', flexShrink: 0 }}>Topik Pembahasan</span>
-                            <span>: 1. Menjelaskan contoh-contoh pemanfaatan Jaringan Nirkabel 2.4GHz, 2. Menjelaskan teknik konfigurasi dan pemanfaatannya 3. Menjelaskan jenis-jenis keamanan pada jaringan Wireless 2.4GHz 4. Menjelaskan teknik optimalisasi dengan integrasi sistem</span>
+                            <span>: {selectedScheduleDetails?.title || 'Agenda Kegiatan KKN'}</span>
                           </div>
                         </div>
                       </div>
