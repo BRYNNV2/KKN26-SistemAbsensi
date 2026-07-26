@@ -454,50 +454,50 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                 </div>
               </div>
 
-              {/* KPI Cards Grid Matching Admin Dashboard */}
+              {/* KPI Cards Grid Matching Admin Dashboard (Clean 3-Color System) */}
               <div className="kpi-cards-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.25rem' }}>
                 
-                <div className="kpi-card blue" style={{ background: '#ffffff', border: '1px solid #e2e8f0', padding: '1.25rem', borderRadius: '12px' }}>
-                  <div className="kpi-icon-wrapper blue" style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="kpi-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', padding: '1.25rem', borderRadius: '10px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                  <div className="kpi-icon-wrapper" style={{ width: '42px', height: '42px', borderRadius: '8px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <UserCheck size={20} />
                   </div>
                   <div className="kpi-details" style={{ marginTop: '0.75rem' }}>
                     <span className="kpi-title" style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>Total Hadir</span>
                     <h3 className="kpi-value" style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', margin: '0.2rem 0' }}>{totalHadir} Hari</h3>
-                    <span className="kpi-trend positive" style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 600 }}>↗ Logbook terverifikasi</span>
+                    <span className="kpi-trend" style={{ fontSize: '0.72rem', color: '#2563eb', fontWeight: 600 }}>Logbook terverifikasi</span>
                   </div>
                 </div>
 
-                <div className="kpi-card emerald" style={{ background: '#ffffff', border: '1px solid #e2e8f0', padding: '1.25rem', borderRadius: '12px' }}>
-                  <div className="kpi-icon-wrapper emerald" style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="kpi-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', padding: '1.25rem', borderRadius: '10px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                  <div className="kpi-icon-wrapper" style={{ width: '42px', height: '42px', borderRadius: '8px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Clock size={20} />
                   </div>
                   <div className="kpi-details" style={{ marginTop: '0.75rem' }}>
                     <span className="kpi-title" style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>Presensi Tepat Waktu</span>
                     <h3 className="kpi-value" style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', margin: '0.2rem 0' }}>{totalHadir} Hari</h3>
-                    <span className="kpi-trend positive" style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 600 }}>↗ 100% disiplin posko</span>
+                    <span className="kpi-trend" style={{ fontSize: '0.72rem', color: '#2563eb', fontWeight: 600 }}>100% disiplin posko</span>
                   </div>
                 </div>
 
-                <div className="kpi-card yellow" style={{ background: '#ffffff', border: '1px solid #e2e8f0', padding: '1.25rem', borderRadius: '12px' }}>
-                  <div className="kpi-icon-wrapper yellow" style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="kpi-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', padding: '1.25rem', borderRadius: '10px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                  <div className="kpi-icon-wrapper" style={{ width: '42px', height: '42px', borderRadius: '8px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <AlertCircle size={20} />
                   </div>
                   <div className="kpi-details" style={{ marginTop: '0.75rem' }}>
                     <span className="kpi-title" style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>Terlambat</span>
                     <h3 className="kpi-value" style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', margin: '0.2rem 0' }}>{totalTerlambat} Hari</h3>
-                    <span className="kpi-trend warning" style={{ fontSize: '0.72rem', color: '#d97706', fontWeight: 600 }}>Toleransi max 15 menit</span>
+                    <span className="kpi-trend" style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>Toleransi max 15 menit</span>
                   </div>
                 </div>
 
-                <div className="kpi-card purple" style={{ background: '#ffffff', border: '1px solid #e2e8f0', padding: '1.25rem', borderRadius: '12px' }}>
-                  <div className="kpi-icon-wrapper purple" style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#f8fafc', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="kpi-card" style={{ background: '#ffffff', border: '1px solid #e2e8f0', padding: '1.25rem', borderRadius: '10px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                  <div className="kpi-icon-wrapper" style={{ width: '42px', height: '42px', borderRadius: '8px', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Percent size={20} />
                   </div>
                   <div className="kpi-details" style={{ marginTop: '0.75rem' }}>
                     <span className="kpi-title" style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>Persentase Presensi</span>
                     <h3 className="kpi-value" style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', margin: '0.2rem 0' }}>{percentKehadiran}%</h3>
-                    <span className="kpi-trend positive" style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 600 }}>↗ Syarat kelulusan KKN</span>
+                    <span className="kpi-trend" style={{ fontSize: '0.72rem', color: '#2563eb', fontWeight: 600 }}>Syarat kelulusan KKN</span>
                   </div>
                 </div>
 

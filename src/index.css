@@ -87,31 +87,18 @@
   animation: fadeInChartArea 0.8s ease-in 0.3s forwards;
 }
 
-/* Card Hover Micro-Interactions */
+/* Dashboard Card Micro-Interactions - Clean 3-Color Flat Design */
 .kpi-card, .admin-chart-card, .mini-calendar-card, .activity-table-card, .upcoming-events-card {
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.kpi-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 26px rgba(37, 99, 235, 0.12);
+.kpi-card:hover, .admin-chart-card:hover, .mini-calendar-card:hover, .activity-table-card:hover, .upcoming-events-card:hover {
   border-color: #cbd5e1;
-}
-
-.admin-chart-card:hover, .mini-calendar-card:hover, .activity-table-card:hover, .upcoming-events-card:hover {
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
-}
-
-[data-theme="dark"] .kpi-card:hover {
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.65);
-  border-color: #3b82f6;
-}
-
-[data-theme="dark"] .admin-chart-card:hover,
-[data-theme="dark"] .mini-calendar-card:hover,
-[data-theme="dark"] .activity-table-card:hover,
-[data-theme="dark"] .upcoming-events-card:hover {
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04);
 }
 
 /* =========================================================
@@ -989,20 +976,22 @@ html, body {
 }
 
 .kpi-card {
-  background: var(--color-admin-card);
-  border: 1px solid var(--color-admin-border);
-  border-radius: var(--radius-card);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
   padding: 1.25rem 1.15rem;
   display: flex;
   align-items: flex-start;
   gap: 1rem;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 
 .kpi-icon-wrapper {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #2563eb;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1010,16 +999,16 @@ html, body {
 }
 
 .kpi-icon-wrapper.blue { background: #eff6ff; color: #2563eb; }
-.kpi-icon-wrapper.emerald { background: #ecfdf5; color: #10b981; }
-.kpi-icon-wrapper.amber { background: #fffbeb; color: #f59e0b; }
-.kpi-icon-wrapper.purple { background: #f3e8ff; color: #8b5cf6; }
+.kpi-icon-wrapper.emerald { background: #eff6ff; color: #2563eb; }
+.kpi-icon-wrapper.amber { background: #eff6ff; color: #2563eb; }
+.kpi-icon-wrapper.purple { background: #eff6ff; color: #2563eb; }
 
 .kpi-details { display: flex; flex-direction: column; }
-.kpi-title { font-size: 0.8rem; font-weight: 600; color: var(--color-text-muted); margin-bottom: 0.2rem; }
-.kpi-value { font-family: var(--font-heading); font-size: 1.65rem; font-weight: 800; color: var(--color-text-main); line-height: 1.15; }
-.kpi-trend { font-size: 0.72rem; font-weight: 700; margin-top: 0.35rem; }
-.kpi-trend.positive { color: #10b981; }
-.kpi-trend.warning { color: #f59e0b; }
+.kpi-title { font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 0.2rem; }
+.kpi-value { font-size: 1.6rem; font-weight: 800; color: #0f172a; line-height: 1.15; }
+.kpi-trend { font-size: 0.72rem; font-weight: 600; margin-top: 0.35rem; color: #64748b; }
+.kpi-trend.positive { color: #2563eb; }
+.kpi-trend.warning { color: #64748b; }
 
 .charts-row-grid {
   display: grid;

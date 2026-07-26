@@ -625,49 +625,49 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
         </div>
       </div>
 
-      {/* KPI Cards Row */}
+      {/* KPI Cards Row (Clean 3-Color System) */}
       <div className="kpi-cards-grid animate-fade-up stagger-1">
-        <div className="kpi-card blue">
-          <div className="kpi-icon-wrapper blue">
-            <UserCheck size={22} />
+        <div className="kpi-card">
+          <div className="kpi-icon-wrapper">
+            <UserCheck size={20} />
           </div>
           <div className="kpi-details">
             <span className="kpi-title">Present Today</span>
             <h3 className="kpi-value">982</h3>
-            <span className="kpi-trend positive">↗ 3.7% dari kemarin</span>
+            <span className="kpi-trend positive">3.7% dari kemarin</span>
           </div>
         </div>
 
-        <div className="kpi-card amber">
-          <div className="kpi-icon-wrapper amber">
-            <UserMinus size={22} />
+        <div className="kpi-card">
+          <div className="kpi-icon-wrapper">
+            <UserMinus size={20} />
           </div>
           <div className="kpi-details">
             <span className="kpi-title">Absent</span>
             <h3 className="kpi-value">42</h3>
-            <span className="kpi-trend warning">↘ 12.5% dari kemarin</span>
+            <span className="kpi-trend warning">12.5% dari kemarin</span>
           </div>
         </div>
 
-        <div className="kpi-card purple">
-          <div className="kpi-icon-wrapper purple">
-            <Clock size={22} />
+        <div className="kpi-card">
+          <div className="kpi-icon-wrapper">
+            <Clock size={20} />
           </div>
           <div className="kpi-details">
             <span className="kpi-title">Late Arrivals</span>
             <h3 className="kpi-value">18</h3>
-            <span className="kpi-trend warning">↘ 8.2% dari kemarin</span>
+            <span className="kpi-trend warning">8.2% dari kemarin</span>
           </div>
         </div>
 
-        <div className="kpi-card blue">
-          <div className="kpi-icon-wrapper blue">
-            <Percent size={22} />
+        <div className="kpi-card">
+          <div className="kpi-icon-wrapper">
+            <Percent size={20} />
           </div>
           <div className="kpi-details">
             <span className="kpi-title">Attendance Rate</span>
             <h3 className="kpi-value">94.6%</h3>
-            <span className="kpi-trend positive">↗ 2.3% dari minggu lalu</span>
+            <span className="kpi-trend positive">2.3% dari minggu lalu</span>
           </div>
         </div>
       </div>

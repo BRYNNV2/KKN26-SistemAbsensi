@@ -137,47 +137,47 @@ export default function AdminDashboardPage({ user, onLogout, onSwitchRole }) {
             <div className="admin-dashboard-body">
               {/* KPI Metric Cards Row (4 Columns) with Staggered Fade Up Animations */}
               <div className="kpi-cards-grid">
-                <div className="kpi-card blue animate-fade-up stagger-1">
-                  <div className="kpi-icon-wrapper blue">
-                    <Users size={22} />
+                <div className="kpi-card animate-fade-up stagger-1">
+                  <div className="kpi-icon-wrapper">
+                    <Users size={20} />
                   </div>
                   <div className="kpi-details">
                     <span className="kpi-title">Total Mahasiswa KKN</span>
                     <h3 className="kpi-value">1,248</h3>
-                    <span className="kpi-trend positive">↗ 5.2% dari bulan lalu</span>
+                    <span className="kpi-trend positive">5.2% dari bulan lalu</span>
                   </div>
                 </div>
 
-                <div className="kpi-card emerald animate-fade-up stagger-2">
-                  <div className="kpi-icon-wrapper emerald">
-                    <UserCheck size={22} />
+                <div className="kpi-card animate-fade-up stagger-2">
+                  <div className="kpi-icon-wrapper">
+                    <UserCheck size={20} />
                   </div>
                   <div className="kpi-details">
                     <span className="kpi-title">Hadir Hari Ini</span>
                     <h3 className="kpi-value">982</h3>
-                    <span className="kpi-trend positive">↗ 97.4% presensi tepat waktu</span>
+                    <span className="kpi-trend positive">97.4% presensi tepat waktu</span>
                   </div>
                 </div>
 
-                <div className="kpi-card amber animate-fade-up stagger-3">
-                  <div className="kpi-icon-wrapper amber">
-                    <Clock size={22} />
+                <div className="kpi-card animate-fade-up stagger-3">
+                  <div className="kpi-icon-wrapper">
+                    <Clock size={20} />
                   </div>
                   <div className="kpi-details">
                     <span className="kpi-title">Pending Izin / Dispensasi</span>
                     <h3 className="kpi-value">28</h3>
-                    <span className="kpi-trend warning">↘ 12.0% dari bulan lalu</span>
+                    <span className="kpi-trend warning">12.0% dari bulan lalu</span>
                   </div>
                 </div>
 
-                <div className="kpi-card purple animate-fade-up stagger-4">
-                  <div className="kpi-icon-wrapper purple">
-                    <MapPin size={22} />
+                <div className="kpi-card animate-fade-up stagger-4">
+                  <div className="kpi-icon-wrapper">
+                    <MapPin size={20} />
                   </div>
                   <div className="kpi-details">
                     <span className="kpi-title">Desa KKN Terdaftar</span>
                     <h3 className="kpi-value">14 Desa</h3>
-                    <span className="kpi-trend positive">↗ 100% binaan DPL terverifikasi</span>
+                    <span className="kpi-trend positive">100% binaan DPL terverifikasi</span>
                   </div>
                 </div>
               </div>

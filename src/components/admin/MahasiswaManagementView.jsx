@@ -114,49 +114,49 @@ export default function MahasiswaManagementView({ user, onLogout, theme, onToggl
 
       {/* Main Body */}
       <div className="admin-dashboard-body">
-        {/* KPI Metrics (4 Columns) */}
+        {/* KPI Metrics (4 Columns - Clean 3-Color System) */}
         <div className="kpi-cards-grid">
-          <div className="kpi-card blue">
-            <div className="kpi-icon-wrapper blue">
-              <Users size={22} />
+          <div className="kpi-card">
+            <div className="kpi-icon-wrapper">
+              <Users size={20} />
             </div>
             <div className="kpi-details">
               <span className="kpi-title">Total Mahasiswa KKN</span>
               <h3 className="kpi-value">{mahasiswaList.length}</h3>
-              <span className="kpi-trend positive">↗ Berdasar database</span>
+              <span className="kpi-trend positive">Berdasarkan database</span>
             </div>
           </div>
 
-          <div className="kpi-card emerald">
-            <div className="kpi-icon-wrapper emerald">
-              <UserCheck size={22} />
+          <div className="kpi-card">
+            <div className="kpi-icon-wrapper">
+              <UserCheck size={20} />
             </div>
             <div className="kpi-details">
               <span className="kpi-title">Aktif Presensi KKN</span>
               <h3 className="kpi-value">{mahasiswaList.filter(m => m.status === 'Active').length}</h3>
-              <span className="kpi-trend positive">↗ Status aktif</span>
+              <span className="kpi-trend positive">Status aktif</span>
             </div>
           </div>
 
-          <div className="kpi-card amber">
-            <div className="kpi-icon-wrapper amber">
-              <Clock size={22} />
+          <div className="kpi-card">
+            <div className="kpi-icon-wrapper">
+              <Clock size={20} />
             </div>
             <div className="kpi-details">
               <span className="kpi-title">Dalam Masa Izin</span>
               <h3 className="kpi-value">{mahasiswaList.filter(m => m.status === 'On Leave' || m.status === 'Leave' || m.status === 'Izin').length}</h3>
-              <span className="kpi-trend warning">↘ Status izin/dispensasi</span>
+              <span className="kpi-trend warning">Status izin/dispensasi</span>
             </div>
           </div>
 
-          <div className="kpi-card purple">
-            <div className="kpi-icon-wrapper purple">
-              <UserPlus size={22} />
+          <div className="kpi-card">
+            <div className="kpi-icon-wrapper">
+              <UserPlus size={20} />
             </div>
             <div className="kpi-details">
               <span className="kpi-title">Mahasiswa Baru</span>
               <h3 className="kpi-value">{mahasiswaList.length > 3 ? 3 : mahasiswaList.length}</h3>
-              <span className="kpi-trend positive">↗ Baru didaftarkan</span>
+              <span className="kpi-trend positive">Baru didaftarkan</span>
             </div>
           </div>
         </div>
