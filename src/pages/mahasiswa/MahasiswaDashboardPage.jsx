@@ -1033,10 +1033,10 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
 
                       <div style={{ textAlign: 'right', alignSelf: 'center' }}>
                         <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff', margin: 0, lineHeight: 1.3 }}>
-                          Fakultas Teknik dan Teknologi Kemaritiman
+                          Universitas Maritim Raja Ali Haji
                         </h3>
                         <span style={{ fontSize: '0.82rem', color: '#cbd5e1', display: 'block', marginTop: '2px' }}>
-                          Teknik Informatika
+                          Kuliah Kerja Nyata (KKN)
                         </span>
                       </div>
                     </div>
