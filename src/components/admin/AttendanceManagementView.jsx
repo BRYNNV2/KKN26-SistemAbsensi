@@ -28,7 +28,7 @@ import AttendanceChart from './AttendanceChart';
 import { supabase } from '../../lib/supabase';
 
 export default function AttendanceManagementView({ user, onLogout, theme, onToggleTheme }) {
-  const [activeTab, setActiveTab] = useState('daily'); // 'daily', 'schedule', 'requests', 'reports'
+  const [activeTab, setActiveTab] = useState('schedule'); // 'schedule', 'daily', 'requests', 'reports'
   const [searchQuery, setSearchQuery] = useState('');
   const [filterDept, setFilterDept] = useState('All Groups');
   const [filterStatus, setFilterStatus] = useState('All');
@@ -680,17 +680,17 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
             <div className="tab-filters">
               <button 
                 type="button" 
-                className={`tab-filter-btn ${activeTab === 'daily' ? 'active' : ''}`}
-                onClick={() => setActiveTab('daily')}
-              >
-                Kehadiran Harian
-              </button>
-              <button 
-                type="button" 
                 className={`tab-filter-btn ${activeTab === 'schedule' ? 'active' : ''}`}
                 onClick={() => setActiveTab('schedule')}
               >
-                Jadwal KKN
+                Jadwal & Kartu Presensi KKN
+              </button>
+              <button 
+                type="button" 
+                className={`tab-filter-btn ${activeTab === 'daily' ? 'active' : ''}`}
+                onClick={() => setActiveTab('daily')}
+              >
+                Tabel Rekap Kehadiran
               </button>
               <button 
                 type="button" 
@@ -1420,25 +1420,25 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
 
       {selectedScheduleDetails && createPortal(
         <div className="modal-overlay" onClick={() => setSelectedScheduleDetails(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(8px)', zIndex: 99999, overflowY: 'auto', padding: '2rem 1rem' }}>
-          <div className="modal-container" style={{ maxWidth: '960px', width: '100%', padding: 0, overflow: 'hidden', background: '#121215', border: '1px solid #27272a' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-container" style={{ maxWidth: '960px', width: '100%', padding: 0, overflow: 'hidden', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '16px', boxShadow: '0 25px 60px rgba(0,0,0,0.15)' }} onClick={(e) => e.stopPropagation()}>
             
             {/* Modal Header Title */}
-            <div style={{ background: '#1a1a1f', padding: '0.8rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #27272a' }}>
-              <span style={{ fontSize: '0.85rem', color: '#a1a1aa' }}>
+            <div style={{ background: '#f8fafc', padding: '1rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #cbd5e1' }}>
+              <span style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 600 }}>
                 Jadwal Kelas Mata Kuliah <strong>{selectedScheduleDetails.title}</strong> pada {selectedScheduleDetails.day}, {selectedScheduleDetails.timeStart} - {selectedScheduleDetails.timeEnd}
               </span>
               <button 
                 type="button" 
                 className="modal-close-btn"
                 onClick={() => setSelectedScheduleDetails(null)}
-                style={{ background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer' }}
+                style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: '4px' }}
               >
                 <X size={18} />
               </button>
             </div>
 
             {/* Modal Navigation Tabs */}
-            <div style={{ background: '#121215', display: 'flex', borderBottom: '1px solid #27272a', padding: '0 1rem' }}>
+            <div style={{ background: '#ffffff', display: 'flex', borderBottom: '1px solid #cbd5e1', padding: '0 1rem' }}>
               {[
                 { id: 'rps', label: 'Bahan Ajar dan Silabus (RPS)' },
                 { id: 'jurnal', label: 'Jurnal Kelas' },
@@ -1453,8 +1453,8 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                     padding: '1rem 1.25rem',
                     background: 'transparent',
                     border: 'none',
-                    color: detailsTab === t.id ? '#eab308' : '#a1a1aa',
-                    borderBottom: detailsTab === t.id ? '3px solid #eab308' : '3px solid transparent',
+                    color: detailsTab === t.id ? '#2563eb' : '#64748b',
+                    borderBottom: detailsTab === t.id ? '3px solid #2563eb' : '3px solid transparent',
                     cursor: 'pointer',
                     fontSize: '0.85rem',
                     fontWeight: detailsTab === t.id ? 700 : 500,
@@ -1473,12 +1473,12 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                   {/* Banner Card */}
                   <div style={{
                     background: 'linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%)',
-                    borderRadius: '8px',
+                    borderRadius: '12px',
                     padding: '2rem 1.5rem',
                     color: '#ffffff',
                     position: 'relative',
                     marginBottom: '1.5rem',
-                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)'
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)'
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
                       <div>
@@ -1487,27 +1487,76 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                         </h2>
                         
                         {/* Class QR Code Trigger */}
-                        <button 
-                          type="button"
-                          onClick={() => setIsFullscreenQR(true)}
-                          style={{
-                            background: 'rgba(255,255,255,0.1)',
-                            border: '1px solid rgba(255,255,255,0.2)',
-                            color: '#ffffff',
-                            padding: '0.35rem 0.75rem',
-                            borderRadius: '4px',
-                            fontSize: '0.75rem',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            cursor: 'pointer',
-                            marginTop: '0.25rem',
-                            marginBottom: '1rem'
-                          }}
-                        >
-                          <span>Class QR Code</span>
-                          <span style={{ fontSize: '0.85rem' }}>🔳</span>
-                        </button>
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '0.25rem', marginBottom: '1rem' }}>
+                          <button 
+                            type="button"
+                            onClick={() => setIsFullscreenQR(true)}
+                            style={{
+                              background: 'rgba(255,255,255,0.1)',
+                              border: '1px solid rgba(255,255,255,0.2)',
+                              color: '#ffffff',
+                              padding: '0.35rem 0.75rem',
+                              borderRadius: '6px',
+                              fontSize: '0.75rem',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              cursor: 'pointer',
+                              fontWeight: 700
+                            }}
+                          >
+                            <span>Class QR Code</span>
+                            <span style={{ fontSize: '0.85rem' }}>🔳</span>
+                          </button>
+
+                          {(activeSession && activeSession.schedule_id === selectedScheduleDetails.id) ? (
+                            <button
+                              type="button"
+                              onClick={handleCloseSession}
+                              style={{
+                                background: '#ef4444',
+                                border: '1px solid #dc2626',
+                                color: '#ffffff',
+                                padding: '0.35rem 0.75rem',
+                                borderRadius: '6px',
+                                fontSize: '0.75rem',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                cursor: 'pointer',
+                                fontWeight: 700
+                              }}
+                            >
+                              <span>🔴 Akhiri Absen</span>
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSessionTitle(selectedScheduleDetails.title);
+                                setSessionDay(selectedScheduleDetails.day);
+                                setSessionBatasJam(selectedScheduleDetails.timeEnd);
+                                setSelectedScheduleId(selectedScheduleDetails.id.toString());
+                                setIsSessionModalOpen(true);
+                              }}
+                              style={{
+                                background: '#16a34a',
+                                border: '1px solid #15803d',
+                                color: '#ffffff',
+                                padding: '0.35rem 0.75rem',
+                                borderRadius: '6px',
+                                fontSize: '0.75rem',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                cursor: 'pointer',
+                                fontWeight: 700
+                              }}
+                            >
+                              <span>⚡ Aktifkan Absen</span>
+                            </button>
+                          )}
+                        </div>
 
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', fontSize: '0.85rem', color: '#cbd5e1' }}>
                           <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -1532,120 +1581,84 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                   </div>
 
                   {/* Two Column Grid */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.5rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 2fr', gap: '1.5rem' }}>
                     
                     {/* Left Column: Absensi Student List */}
-                    <div style={{ background: '#18181b', borderRadius: '8px', border: '1px solid #27272a', padding: '1rem', height: 'fit-content' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #27272a', paddingBottom: '0.75rem', marginBottom: '1rem' }}>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#e4e4e7' }}>Absensi</span>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#e4e4e7' }}>
-                          {attendanceData.length || 5}/{attendanceData.length || 5}
+                    <div style={{ background: '#f8fafc', borderRadius: '12px', border: '1px solid #cbd5e1', padding: '1.25rem', height: 'fit-content' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.75rem', marginBottom: '1rem' }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>Daftar Mahasiswa Hadir</span>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#2563eb', background: '#eff6ff', padding: '0.2rem 0.65rem', borderRadius: '20px' }}>
+                          {attendanceData.length || 5} Orang
                         </span>
                       </div>
 
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '360px', overflowY: 'auto', paddingRight: '4px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', maxHeight: '360px', overflowY: 'auto', paddingRight: '4px' }}>
                         {(attendanceData.length > 0 ? attendanceData : [
-                          { nim: '2301020118', name: 'Meuthia Kayla Putri' },
-                          { nim: '2301020117', name: 'Muhammad Arroyyan Hamel' },
-                          { nim: '2301020114', name: 'M. Febrian' },
-                          { nim: '2301020112', name: 'M. Hidayatulrizki' },
-                          { nim: '2301020111', name: 'Khairul Ilham' }
+                          { nim: '2301020118', name: 'Meuthia Kayla Putri', checkIn: '08:15 AM' },
+                          { nim: '2301020117', name: 'Muhammad Arroyyan Hamel', checkIn: '08:20 AM' },
+                          { nim: '2301020114', name: 'M. Febrian', checkIn: '08:22 AM' },
+                          { nim: '2301020112', name: 'M. Hidayatulrizki', checkIn: '08:25 AM' },
+                          { nim: '2301020111', name: 'Khairul Ilham', checkIn: '08:30 AM' }
                         ]).map((s, idx) => (
                           <div 
                             key={idx}
                             style={{ 
                               display: 'flex', 
-                              justifyContent: 'space-between', 
+                              justifyContent: 'space-between',
+                              alignItems: 'center', 
                               fontSize: '0.8rem', 
-                              padding: '0.5rem 0.25rem', 
-                              borderBottom: '1px solid #27272a',
-                              color: '#d4d4d8'
+                              padding: '0.65rem 0.85rem', 
+                              background: '#ffffff',
+                              border: '1px solid #cbd5e1',
+                              borderRadius: '8px',
+                              color: '#0f172a'
                             }}
                           >
-                            <span style={{ fontFamily: 'monospace', color: '#a1a1aa' }}>{s.nim}</span>
-                            <span style={{ fontWeight: 600 }}>{s.name}</span>
+                            <div>
+                              <h5 style={{ margin: 0, fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>{s.name}</h5>
+                              <span style={{ fontSize: '0.7rem', color: '#64748b' }}>NIM: {s.nim}</span>
+                            </div>
+                            <span style={{ fontSize: '0.75rem', color: '#16a34a', fontWeight: 700 }}>{s.checkIn || s.check_in || 'Hadir'}</span>
                           </div>
                         ))}
-                      </div>
-                      
-                      <div style={{ textAlign: 'center', marginTop: '1rem', color: '#a1a1aa', cursor: 'pointer' }}>
-                        <span>▼</span>
                       </div>
                     </div>
 
                     {/* Right Column: Jurnal Entries list */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                      
-                      {/* Entry 1 */}
-                      <div style={{ background: '#18181b', borderRadius: '8px', border: '1px solid #27272a', padding: '1.5rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                      <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #cbd5e1', padding: '1.5rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.75rem' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#27272a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a1a1aa' }}>
+                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0f172a', fontWeight: 'bold', fontSize: '1rem' }}>
                               👤
                             </div>
                             <div>
-                              <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f4f4f5', margin: 0 }}>
+                              <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
                                 Berta Erwin Slam, S.T., M.Kom
                               </h4>
-                              <span style={{ fontSize: '0.75rem', color: '#a1a1aa' }}>19 Mei 2026 - 07:33</span>
+                              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Dosen Pembimbing Lapangan</span>
                             </div>
                           </div>
-                          <span style={{ fontSize: '0.75rem', color: '#10b981', background: 'rgba(16,185,129,0.1)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontWeight: 600 }}>
-                            Terlaksana
+                          <span style={{ fontSize: '0.75rem', color: '#2563eb', background: '#eff6ff', padding: '0.25rem 0.5rem', borderRadius: '4px', fontWeight: 600 }}>
+                            Terjadwal
                           </span>
                         </div>
 
-                        <div style={{ fontSize: '0.85rem', color: '#d4d4d8', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <div style={{ fontSize: '0.85rem', color: '#334155', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                           <div>
-                            <span style={{ color: '#a1a1aa', width: '120px', display: 'inline-block' }}>Jenis Jurnal</span>
-                            <span>: Teori & Pengarahan</span>
+                            <span style={{ color: '#64748b', width: '130px', display: 'inline-block', fontWeight: 600 }}>Jenis Presensi</span>
+                            <span>: Kehadiran Posko</span>
                           </div>
                           <div>
-                            <span style={{ color: '#a1a1aa', width: '120px', display: 'inline-block' }}>Metode Ajar</span>
-                            <span>: Offline</span>
+                            <span style={{ color: '#64748b', width: '130px', display: 'inline-block', fontWeight: 600 }}>Metode Absen</span>
+                            <span>: QR Code Broadcast</span>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-                            <span style={{ color: '#a1a1aa', width: '120px', display: 'inline-block', flexShrink: 0 }}>Topik Pembahasan</span>
-                            <span>: Menjelaskan agenda kegiatan KKN, pemetaan kelompok, dan panduan upload logbook harian mahasiswa.</span>
+                            <span style={{ color: '#64748b', width: '130px', display: 'inline-block', flexShrink: 0, fontWeight: 600 }}>Topik Pembahasan</span>
+                            <span>: {selectedScheduleDetails.title}. Memastikan presensi mahasiswa terfasilitasi dengan baik sesuai hari pelaksanaan.</span>
                           </div>
                         </div>
                       </div>
-
-                      {/* Entry 2 */}
-                      <div style={{ background: '#18181b', borderRadius: '8px', border: '1px solid #27272a', padding: '1.5rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#27272a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a1a1aa' }}>
-                              👤
-                            </div>
-                            <div>
-                              <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f4f4f5', margin: 0 }}>
-                                Berta Erwin Slam, S.T., M.Kom
-                              </h4>
-                              <span style={{ fontSize: '0.75rem', color: '#a1a1aa' }}>12 Mei 2026 - 21:57</span>
-                            </div>
-                          </div>
-                          <span style={{ fontSize: '0.75rem', color: '#eab308', background: 'rgba(234,179,8,0.1)', padding: '0.25rem 0.5rem', borderRadius: '4px', fontWeight: 600 }}>
-                            Dijadwalkan
-                          </span>
-                        </div>
-
-                        <div style={{ fontSize: '0.85rem', color: '#d4d4d8', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                          <div>
-                            <span style={{ color: '#a1a1aa', width: '120px', display: 'inline-block' }}>Jenis Jurnal</span>
-                            <span>: Teori</span>
-                          </div>
-                          <div>
-                            <span style={{ color: '#a1a1aa', width: '120px', display: 'inline-block' }}>Metode Ajar</span>
-                            <span>: Offline</span>
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-                            <span style={{ color: '#a1a1aa', width: '120px', display: 'inline-block', flexShrink: 0 }}>Topik Pembahasan</span>
-                            <span>: Penjelasan detail program kerja unggulan, koordinasi desa, dan persiapan keberangkatan.</span>
-                          </div>
-                        </div>
-                      </div>
-
                     </div>
 
                   </div>
