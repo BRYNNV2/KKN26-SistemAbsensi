@@ -622,27 +622,70 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                    {schedules.map((sc) => (
-                      <div 
-                        key={sc.id}
-                        onClick={() => setSelectedSchedule(sc)}
-                        style={{
-                          background: '#f8fafc',
-                          border: '1px solid #e2e8f0',
-                          borderRadius: '8px',
-                          padding: '1rem',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease'
-                        }}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a' }}>{sc.day} ({sc.timeStart} - {sc.timeEnd})</span>
-                          <ChevronRight size={15} style={{ color: '#94a3b8' }} />
+                    {schedules.map((sc) => {
+                      const isActive = activeSession && (activeSession.schedule_id === sc.id || activeSession.title.includes(sc.title));
+                      return (
+                        <div 
+                          key={sc.id}
+                          onClick={() => setSelectedSchedule(sc)}
+                          style={{
+                            background: isActive ? '#eff6ff' : '#ffffff',
+                            border: isActive ? '1px solid #3b82f6' : '1px solid #e2e8f0',
+                            borderRadius: '12px',
+                            padding: '1.25rem',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            position: 'relative',
+                            boxShadow: isActive ? '0 4px 12px rgba(59, 130, 246, 0.08)' : 'none'
+                          }}
+                        >
+                          {isActive && (
+                            <div style={{
+                              position: 'absolute',
+                              top: '12px',
+                              right: '12px',
+                              background: '#dcfce7',
+                              border: '1px solid #bbf7d0',
+                              color: '#166534',
+                              fontSize: '0.68rem',
+                              fontWeight: 700,
+                              padding: '0.2rem 0.5rem',
+                              borderRadius: '20px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}>
+                              <span className="dot emerald sparkle-pulsing" style={{ width: '6px', height: '6px', background: '#10b981', borderRadius: '50%' }} />
+                              <span>Absen Aktif</span>
+                            </div>
+                          )}
+
+                          <div style={{ marginBottom: '0.75rem' }}>
+                            <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1e293b', margin: '0 0 0.2rem 0' }}>{sc.title}</h4>
+                            <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>{sc.code || 'KKN_ACT'}</span>
+                          </div>
+
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '0.8rem', color: '#475569' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <Calendar size={14} style={{ color: '#3b82f6' }} />
+                              <span>{sc.day}</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <Clock size={14} style={{ color: '#f59e0b' }} />
+                              <span>{sc.timeStart} - {sc.timeEnd}</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <BookOpen size={14} style={{ color: '#a855f7' }} />
+                              <span>{sc.group || 'Semua Kelompok'}</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <MapPin size={14} style={{ color: '#10b981' }} />
+                              <span>{sc.location || 'Posko KKN'}</span>
+                            </div>
+                          </div>
                         </div>
-                        <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.25rem 0' }}>{sc.title}</h4>
-                        <span style={{ fontSize: '0.78rem', color: '#64748b' }}>📍 {sc.location}</span>
-                      </div>
-                    ))}
+                      );
+                    })}
                     {schedules.length === 0 && (
                       <div style={{ textAlign: 'center', padding: '2rem 1rem', color: '#94a3b8', fontSize: '0.85rem' }}>
                         Belum ada jadwal yang diinput oleh Dosen DPL.

@@ -922,16 +922,26 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                             return (
                               <div 
                                 key={evt.id} 
-                                className={`schedule-event-card ${isActive ? 'active-schedule' : ''}`}
+                                className={`schedule-event-card ${(activeSession && activeSession.schedule_id === evt.id) ? 'active-schedule' : ''}`}
                                 onClick={() => setSelectedScheduleDetails(evt)}
-                                style={{ cursor: 'pointer' }}
+                                style={{ 
+                                  cursor: 'pointer', 
+                                  background: (activeSession && activeSession.schedule_id === evt.id) ? '#eff6ff' : undefined, 
+                                  borderColor: (activeSession && activeSession.schedule_id === evt.id) ? '#3b82f6' : undefined,
+                                  boxShadow: (activeSession && activeSession.schedule_id === evt.id) ? '0 4px 12px rgba(59, 130, 246, 0.08)' : undefined
+                                }}
                               >
-                                {isActive && (
+                                {(activeSession && activeSession.schedule_id === evt.id) ? (
+                                  <div className="ongoing-schedule-badge" style={{ background: '#dcfce7', border: '1px solid #bbf7d0', color: '#166534' }}>
+                                    <Sparkles size={11} className="sparkle-pulsing" style={{ color: '#16a34a' }} />
+                                    <span>Absen Aktif</span>
+                                  </div>
+                                ) : isActive ? (
                                   <div className="ongoing-schedule-badge">
                                     <Sparkles size={11} className="sparkle-pulsing" />
                                     <span>Sedang Berlangsung</span>
                                   </div>
-                                )}
+                                ) : null}
 
                                 <div className="event-card-top">
                                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -983,6 +993,66 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                                     <MapPin size={14} className="detail-icon" />
                                     <span>{evt.location}</span>
                                   </div>
+                                </div>
+
+                                <div style={{ marginTop: '0.85rem', paddingTop: '0.75rem', borderTop: '1px solid #cbd5e1', display: 'flex', justifyContent: 'center' }} onClick={(e) => e.stopPropagation()}>
+                                  {(activeSession && activeSession.schedule_id === evt.id) ? (
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleCloseSession();
+                                      }}
+                                      style={{
+                                        width: '100%',
+                                        background: '#ef4444',
+                                        borderColor: '#ef4444',
+                                        color: '#ffffff',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        padding: '0.45rem',
+                                        fontSize: '0.78rem',
+                                        fontWeight: 700,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '4px',
+                                        cursor: 'pointer'
+                                      }}
+                                    >
+                                      <span>🔴 Akhiri Absen</span>
+                                    </button>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSessionTitle(evt.title);
+                                        setSessionDay(evt.day);
+                                        setSessionBatasJam(evt.timeEnd);
+                                        setSelectedScheduleId(evt.id.toString());
+                                        setIsSessionModalOpen(true);
+                                      }}
+                                      style={{
+                                        width: '100%',
+                                        background: '#2563eb',
+                                        borderColor: '#2563eb',
+                                        color: '#ffffff',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        padding: '0.45rem',
+                                        fontSize: '0.78rem',
+                                        fontWeight: 700,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '4px',
+                                        cursor: 'pointer'
+                                      }}
+                                    >
+                                      <span>⚡ Aktifkan Absen</span>
+                                    </button>
+                                  )}
                                 </div>
                               </div>
                             );
