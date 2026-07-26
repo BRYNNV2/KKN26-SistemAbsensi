@@ -918,7 +918,6 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                       <div className="schedule-events-container">
                         {dayEvents.length > 0 ? (
                           dayEvents.map((evt) => {
-                            const isActive = checkIsActive(evt);
                             return (
                               <div 
                                 key={evt.id} 
@@ -926,26 +925,25 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                                 onClick={() => setSelectedScheduleDetails(evt)}
                                 style={{ 
                                   cursor: 'pointer', 
-                                  background: (activeSession && activeSession.schedule_id === evt.id) ? '#eff6ff' : undefined, 
-                                  borderColor: (activeSession && activeSession.schedule_id === evt.id) ? '#3b82f6' : undefined,
-                                  boxShadow: (activeSession && activeSession.schedule_id === evt.id) ? '0 4px 12px rgba(59, 130, 246, 0.08)' : undefined
+                                  background: (activeSession && activeSession.schedule_id === evt.id) ? '#eff6ff' : '#ffffff', 
+                                  border: (activeSession && activeSession.schedule_id === evt.id) ? '1px solid #2563eb' : '1px solid #e2e8f0',
+                                  borderRadius: '10px',
+                                  padding: '1rem'
                                 }}
                               >
                                 {(activeSession && activeSession.schedule_id === evt.id) ? (
-                                  <div className="ongoing-schedule-badge" style={{ background: '#dcfce7', border: '1px solid #bbf7d0', color: '#166534' }}>
-                                    <Sparkles size={11} className="sparkle-pulsing" style={{ color: '#16a34a' }} />
+                                  <div className="ongoing-schedule-badge" style={{ background: '#dbeafe', color: '#1e40af', border: '1px solid #bfdbfe' }}>
                                     <span>Absen Aktif</span>
                                   </div>
                                 ) : isActive ? (
-                                  <div className="ongoing-schedule-badge">
-                                    <Sparkles size={11} className="sparkle-pulsing" />
+                                  <div className="ongoing-schedule-badge" style={{ background: '#f1f5f9', color: '#475569' }}>
                                     <span>Sedang Berlangsung</span>
                                   </div>
                                 ) : null}
 
                                 <div className="event-card-top">
                                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                    <h4 className="event-card-title">{evt.title}</h4>
+                                    <h4 className="event-card-title" style={{ color: '#0f172a', fontSize: '0.9rem', fontWeight: 700, margin: 0 }}>{evt.title}</h4>
                                     
                                     {/* Action Buttons for Schedule */}
                                     <div className="schedule-card-actions" style={{ display: 'flex', gap: '4px' }}>
@@ -973,29 +971,29 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                                       </button>
                                     </div>
                                   </div>
-                                  <span className="event-card-code">{evt.code}</span>
+                                  <span className="event-card-code" style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>{evt.code}</span>
                                 </div>
 
-                                <div className="event-card-details">
+                                <div className="event-card-details" style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '0.78rem', color: '#475569' }}>
                                   <div className="event-detail-item">
-                                    <Calendar size={14} className="detail-icon" />
+                                    <Calendar size={14} style={{ color: '#2563eb' }} />
                                     <span>{evt.day}</span>
                                   </div>
                                   <div className="event-detail-item">
-                                    <Clock size={14} className="detail-icon" />
+                                    <Clock size={14} style={{ color: '#2563eb' }} />
                                     <span>{evt.timeStart} - {evt.timeEnd}</span>
                                   </div>
-                                  <div className="event-detail-item group-info">
-                                    <BookOpen size={14} className="detail-icon" />
+                                  <div className="event-detail-item">
+                                    <BookOpen size={14} style={{ color: '#2563eb' }} />
                                     <span>{evt.group}</span>
                                   </div>
-                                  <div className="event-detail-item location-info">
-                                    <MapPin size={14} className="detail-icon" />
+                                  <div className="event-detail-item">
+                                    <MapPin size={14} style={{ color: '#2563eb' }} />
                                     <span>{evt.location}</span>
                                   </div>
                                 </div>
 
-                                <div style={{ marginTop: '0.85rem', paddingTop: '0.75rem', borderTop: '1px solid #cbd5e1', display: 'flex', justifyContent: 'center' }} onClick={(e) => e.stopPropagation()}>
+                                <div style={{ marginTop: '0.85rem', paddingTop: '0.75rem', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'center' }} onClick={(e) => e.stopPropagation()}>
                                   {(activeSession && activeSession.schedule_id === evt.id) ? (
                                     <button
                                       type="button"
@@ -1005,12 +1003,11 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                                       }}
                                       style={{
                                         width: '100%',
-                                        background: '#ef4444',
-                                        borderColor: '#ef4444',
+                                        background: '#dc2626',
                                         color: '#ffffff',
                                         border: 'none',
                                         borderRadius: '6px',
-                                        padding: '0.45rem',
+                                        padding: '0.5rem',
                                         fontSize: '0.78rem',
                                         fontWeight: 700,
                                         display: 'flex',
@@ -1020,7 +1017,7 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                                         cursor: 'pointer'
                                       }}
                                     >
-                                      <span>🔴 Akhiri Absen</span>
+                                      <span>Akhiri Absen</span>
                                     </button>
                                   ) : (
                                     <button
@@ -1036,11 +1033,10 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                                       style={{
                                         width: '100%',
                                         background: '#2563eb',
-                                        borderColor: '#2563eb',
                                         color: '#ffffff',
                                         border: 'none',
                                         borderRadius: '6px',
-                                        padding: '0.45rem',
+                                        padding: '0.5rem',
                                         fontSize: '0.78rem',
                                         fontWeight: 700,
                                         display: 'flex',
@@ -1050,7 +1046,7 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                                         cursor: 'pointer'
                                       }}
                                     >
-                                      <span>⚡ Aktifkan Absen</span>
+                                      <span>Aktifkan Absen</span>
                                     </button>
                                   )}
                                 </div>

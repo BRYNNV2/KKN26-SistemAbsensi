@@ -630,13 +630,13 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                           onClick={() => setSelectedSchedule(sc)}
                           style={{
                             background: isActive ? '#eff6ff' : '#ffffff',
-                            border: isActive ? '1px solid #3b82f6' : '1px solid #e2e8f0',
-                            borderRadius: '12px',
+                            border: isActive ? '1px solid #2563eb' : '1px solid #e2e8f0',
+                            borderRadius: '10px',
                             padding: '1.25rem',
                             cursor: 'pointer',
-                            transition: 'all 0.2s ease',
+                            transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
                             position: 'relative',
-                            boxShadow: isActive ? '0 4px 12px rgba(59, 130, 246, 0.08)' : 'none'
+                            boxShadow: isActive ? '0 2px 6px rgba(37, 99, 235, 0.08)' : '0 1px 3px rgba(0,0,0,0.04)'
                           }}
                         >
                           {isActive && (
@@ -644,42 +644,38 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
                               position: 'absolute',
                               top: '12px',
                               right: '12px',
-                              background: '#dcfce7',
-                              border: '1px solid #bbf7d0',
-                              color: '#166534',
-                              fontSize: '0.68rem',
+                              background: '#dbeafe',
+                              border: '1px solid #bfdbfe',
+                              color: '#1e40af',
+                              fontSize: '0.7rem',
                               fontWeight: 700,
-                              padding: '0.2rem 0.5rem',
-                              borderRadius: '20px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '4px'
+                              padding: '0.2rem 0.55rem',
+                              borderRadius: '6px'
                             }}>
-                              <span className="dot emerald sparkle-pulsing" style={{ width: '6px', height: '6px', background: '#10b981', borderRadius: '50%' }} />
-                              <span>Absen Aktif</span>
+                              Absen Aktif
                             </div>
                           )}
 
                           <div style={{ marginBottom: '0.75rem' }}>
-                            <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1e293b', margin: '0 0 0.2rem 0' }}>{sc.title}</h4>
+                            <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.2rem 0' }}>{sc.title}</h4>
                             <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>{sc.code || 'KKN_ACT'}</span>
                           </div>
 
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '0.8rem', color: '#475569' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <Calendar size={14} style={{ color: '#3b82f6' }} />
+                              <Calendar size={14} style={{ color: '#2563eb' }} />
                               <span>{sc.day}</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <Clock size={14} style={{ color: '#f59e0b' }} />
+                              <Clock size={14} style={{ color: '#2563eb' }} />
                               <span>{sc.timeStart} - {sc.timeEnd}</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <BookOpen size={14} style={{ color: '#a855f7' }} />
+                              <BookOpen size={14} style={{ color: '#2563eb' }} />
                               <span>{sc.group || 'Semua Kelompok'}</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <MapPin size={14} style={{ color: '#10b981' }} />
+                              <MapPin size={14} style={{ color: '#2563eb' }} />
                               <span>{sc.location || 'Posko KKN'}</span>
                             </div>
                           </div>
