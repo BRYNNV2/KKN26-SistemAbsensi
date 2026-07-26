@@ -53,6 +53,11 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
   const [sessionBatasJam, setSessionBatasJam] = useState('12:00');
   const [selectedScheduleId, setSelectedScheduleId] = useState('');
 
+  // Agenda Modal states
+  const [isAgendaModalOpen, setIsAgendaModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedAgendaId, setSelectedAgendaId] = useState(null);
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 7;
@@ -245,6 +250,20 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
   const [agendaTimeEnd, setAgendaTimeEnd] = useState('10:30');
   const [agendaGroup, setAgendaGroup] = useState('');
   const [agendaLocation, setAgendaLocation] = useState('');
+
+  const handleOpenAddAgenda = () => {
+    setIsEditing(false);
+    setSelectedAgendaId(null);
+    setAgendaTitle('');
+    setAgendaDay('Senin');
+    setAgendaCode('');
+    setAgendaTimeStart('08:00');
+    setAgendaTimeEnd('10:30');
+    setAgendaGroup('');
+    setAgendaLocation('');
+    setIsAgendaModalOpen(true);
+  };
+
 
   const handleStartSession = async (e) => {
     if (e) e.preventDefault();
