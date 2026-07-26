@@ -1741,44 +1741,44 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
         document.body
       )}
 
-      {/* Modal 1: Konfigurasi Pembukaan Sesi Presensi QR */}
+      {/* Modal 1: Konfigurasi Pembukaan Sesi Presensi QR (CLEAN 3-COLOR SYSTEM) */}
       {isSessionModalOpen && createPortal(
-        <div className="modal-overlay" onClick={() => setIsSessionModalOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(8px)', zIndex: 99999 }}>
-          <div className="modal-container" style={{ maxWidth: '500px', width: '90%', padding: '1.75rem', background: '#121215', border: '1px solid #27272a', borderRadius: '16px', boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7)' }} onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay" onClick={() => setIsSessionModalOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(4px)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div className="modal-container" style={{ maxWidth: '480px', width: '100%', padding: '1.75rem', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '12px', boxShadow: '0 25px 60px rgba(0, 0, 0, 0.2)' }} onClick={(e) => e.stopPropagation()}>
             
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid #27272a', paddingBottom: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#34d399' }}>
-                  <Sparkles size={22} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: '#eff6ff', border: '1px solid #bfdbfe', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb' }}>
+                  <QrCode size={20} />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f4f4f5', margin: 0 }}>Buka Sesi Presensi QR</h3>
-                  <p style={{ fontSize: '0.78rem', color: '#a1a1aa', margin: '0.15rem 0 0 0' }}>Buka sesi presensi agar tampil di dashboard mahasiswa</p>
+                  <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Aktifkan Sesi Presensi</h3>
+                  <p style={{ fontSize: '0.78rem', color: '#64748b', margin: '0.15rem 0 0 0' }}>Buka sesi presensi agar mahasiswa dapat melakukan absen</p>
                 </div>
               </div>
               <button 
                 type="button" 
                 onClick={() => setIsSessionModalOpen(false)}
-                style={{ background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer', padding: '0.4rem' }}
+                style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: '0.4rem' }}
               >
                 <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleStartSession} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <form onSubmit={handleStartSession} style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
               {/* Day Selector */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e4e4e7' }}>Jadwal Hari</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0f172a' }}>Jadwal Hari</label>
                 <select 
                   value={sessionDay}
                   onChange={(e) => setSessionDay(e.target.value)}
                   style={{ 
                     width: '100%', 
-                    padding: '0.7rem 0.9rem', 
-                    background: '#18181b', 
-                    border: '1px solid #27272a', 
-                    borderRadius: '8px', 
-                    color: '#f4f4f5', 
+                    padding: '0.65rem 0.85rem', 
+                    background: '#f8fafc', 
+                    border: '1px solid #cbd5e1', 
+                    borderRadius: '6px', 
+                    color: '#0f172a', 
                     fontSize: '0.85rem', 
                     outline: 'none',
                     cursor: 'pointer'
@@ -1792,20 +1792,20 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
               </div>
 
               {/* Title / Kegiatan */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e4e4e7' }}>Nama Kegiatan (Topik)</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0f172a' }}>Nama Agenda Kegiatan</label>
                 <input 
                   type="text" 
                   value={sessionTitle}
                   onChange={(e) => setSessionTitle(e.target.value)}
-                  placeholder="Contoh: Kerja Bakti Desa / Koordinasi Lapangan"
+                  placeholder="Contoh: Kerja Bakti Desa / Supervisi Posko"
                   style={{ 
                     width: '100%', 
-                    padding: '0.7rem 0.9rem', 
-                    background: '#18181b', 
-                    border: '1px solid #27272a', 
-                    borderRadius: '8px', 
-                    color: '#f4f4f5', 
+                    padding: '0.65rem 0.85rem', 
+                    background: '#ffffff', 
+                    border: '1px solid #cbd5e1', 
+                    borderRadius: '6px', 
+                    color: '#0f172a', 
                     fontSize: '0.85rem', 
                     outline: 'none'
                   }}
@@ -1814,19 +1814,19 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
               </div>
 
               {/* Time Limit / Batas Jam */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e4e4e7' }}>Batas Jam (Waktu Selesai)</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0f172a' }}>Batas Waktu Selesai (Batas Jam)</label>
                 <input 
                   type="time" 
                   value={sessionBatasJam}
                   onChange={(e) => setSessionBatasJam(e.target.value)}
                   style={{ 
                     width: '100%', 
-                    padding: '0.7rem 0.9rem', 
-                    background: '#18181b', 
-                    border: '1px solid #27272a', 
-                    borderRadius: '8px', 
-                    color: '#f4f4f5', 
+                    padding: '0.65rem 0.85rem', 
+                    background: '#ffffff', 
+                    border: '1px solid #cbd5e1', 
+                    borderRadius: '6px', 
+                    color: '#0f172a', 
                     fontSize: '0.85rem', 
                     outline: 'none'
                   }}
@@ -1835,8 +1835,8 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
               </div>
 
               {/* Select Agenda schedule reference (optional helper to autofill) */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <label style={{ fontSize: '0.8rem', color: '#a1a1aa' }}>Pilih dari Agenda Kegiatan (Autofill)</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                <label style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 500 }}>Pilihan Kartu Agenda (Autofill)</label>
                 <select 
                   value={selectedScheduleId}
                   onChange={(e) => {
@@ -1850,41 +1850,60 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                   }}
                   style={{ 
                     width: '100%', 
-                    padding: '0.7rem 0.9rem', 
-                    background: '#18181b', 
-                    border: '1px solid #27272a', 
-                    borderRadius: '8px', 
-                    color: '#a1a1aa', 
+                    padding: '0.65rem 0.85rem', 
+                    background: '#f8fafc', 
+                    border: '1px solid #cbd5e1', 
+                    borderRadius: '6px', 
+                    color: '#475569', 
                     fontSize: '0.8rem', 
                     outline: 'none',
                     cursor: 'pointer'
                   }}
                 >
-                  <option value="">-- Pilih Agenda --</option>
+                  <option value="">-- Pilih dari Jadwal Agenda --</option>
                   {schedules.map(s => (
-                    <option key={s.id} value={s.id}>
-                      {s.day} - {s.title} ({s.timeStart} - {s.timeEnd})
-                    </option>
+                    <option key={s.id} value={s.id}>{s.day}: {s.title} ({s.timeStart} - {s.timeEnd})</option>
                   ))}
                 </select>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem', paddingTop: '1rem', borderTop: '1px solid #27272a' }}>
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.75rem' }}>
                 <button 
                   type="button" 
                   onClick={() => setIsSessionModalOpen(false)}
-                  style={{ padding: '0.65rem 1.25rem', background: '#27272a', color: '#e4e4e7', border: 'none', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}
+                  style={{
+                    flex: 1,
+                    padding: '0.65rem',
+                    background: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '6px',
+                    color: '#475569',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
                 >
                   Batal
                 </button>
                 <button 
-                  type="submit" 
-                  style={{ padding: '0.65rem 1.5rem', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#ffffff', border: 'none', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)' }}
+                  type="submit"
+                  style={{
+                    flex: 1,
+                    padding: '0.65rem',
+                    background: '#2563eb',
+                    border: 'none',
+                    borderRadius: '6px',
+                    color: '#ffffff',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
                 >
-                  Mulai Sesi
+                  Mulai Sesi Absen
                 </button>
               </div>
             </form>
+
           </div>
         </div>,
         document.body
