@@ -221,16 +221,18 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
       const { data, error } = await supabase.from('schedules').select('*').order('id', { ascending: true });
       if (error) throw error;
       if (data) {
-        const mapped = data.map(s => ({
-          id: s.id,
-          title: s.title,
-          code: s.code || 'KKN_ACT',
-          day: s.day,
-          timeStart: s.time_start || '08:00',
-          timeEnd: s.time_end || '10:00',
-          group: s.group_kkn || 'Semua Kelompok',
-          location: s.location
-        }));
+        const mapped = data
+          .filter(s => !s.code?.startsWith('ABS-') && !s.title?.startsWith('Presensi KKN'))
+          .map(s => ({
+            id: s.id,
+            title: s.title,
+            code: s.code || 'KKN_ACT',
+            day: s.day,
+            timeStart: s.time_start || '08:00',
+            timeEnd: s.time_end || '10:00',
+            group: s.group_kkn || 'Semua Kelompok',
+            location: s.location
+          }));
         setSchedules(mapped);
         localStorage.setItem('kkn_schedules_cached', JSON.stringify(mapped));
       }
@@ -238,7 +240,9 @@ export default function MahasiswaDashboardPage({ user, onLogout }) {
       console.warn('Failed to load schedules from Supabase:', err.message);
       const cached = localStorage.getItem('kkn_schedules_cached');
       if (cached) {
-        setSchedules(JSON.parse(cached));
+        const parsed = JSON.parse(cached).filter(s => !s.code?.startsWith('ABS-') && !s.title?.startsWith('Presensi KKN'));
+        setSchedules(parsed);
+        localStorage.setItem('kkn_schedules_cached', JSON.stringify(parsed));
       }
     }
   };

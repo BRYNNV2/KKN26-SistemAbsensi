@@ -236,16 +236,11 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
   // ---------------------------------------------------------
   // AGENDA SCHEDULE CRUD & ACTIVE DETECTION STATES
   // ---------------------------------------------------------
-  
-  // Modal form states for CRUD
-  const [isAgendaModalOpen, setIsAgendaModalOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [selectedAgendaId, setSelectedAgendaId] = useState(null);
 
-  // Form Fields
+  // Form states for creating/editing Agenda KKN
   const [agendaTitle, setAgendaTitle] = useState('');
-  const [agendaCode, setAgendaCode] = useState('');
   const [agendaDay, setAgendaDay] = useState('Senin');
+  const [agendaCode, setAgendaCode] = useState('');
   const [agendaTimeStart, setAgendaTimeStart] = useState('08:00');
   const [agendaTimeEnd, setAgendaTimeEnd] = useState('10:30');
   const [agendaGroup, setAgendaGroup] = useState('');
@@ -256,31 +251,6 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
     const qrToken = `session-${Date.now()}`;
     
     let targetScheduleId = selectedScheduleId ? parseInt(selectedScheduleId) : null;
-
-    // Create a new card in the schedules table if no existing schedule reference was selected
-    if (!targetScheduleId) {
-      try {
-        const timeStart = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-        const { data: insertedSched, error: schedErr } = await supabase
-          .from('schedules')
-          .insert({
-            title: sessionTitle,
-            code: `ABS-${Date.now().toString().slice(-4)}`,
-            day: sessionDay,
-            time_start: timeStart,
-            time_end: sessionBatasJam,
-            group_kkn: user?.kelompok || 'Semua Kelompok',
-            location: 'Posko KKN'
-          })
-          .select();
-        
-        if (!schedErr && insertedSched && insertedSched.length > 0) {
-          targetScheduleId = insertedSched[0].id;
-        }
-      } catch (scheduleErr) {
-        console.warn('Failed to insert schedule card for session:', scheduleErr.message);
-      }
-    }
 
     const newSession = {
       title: sessionTitle,
@@ -333,28 +303,6 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
       localStorage.setItem('kkn_active_session', JSON.stringify(savedSession));
     }
 
-    // Append to local storage schedules cache so it renders immediately on both panels
-    const cachedSchedules = localStorage.getItem('kkn_schedules_cached');
-    if (cachedSchedules) {
-      const list = JSON.parse(cachedSchedules);
-      const exists = list.some(s => s.title === sessionTitle && s.day === sessionDay);
-      if (!exists) {
-        const localSched = {
-          id: targetScheduleId || Date.now(),
-          title: sessionTitle,
-          code: `ABS-${Date.now().toString().slice(-4)}`,
-          day: sessionDay,
-          timeStart: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-          timeEnd: sessionBatasJam,
-          group: user?.kelompok || 'Semua Kelompok',
-          location: 'Posko KKN'
-        };
-        list.push(localSched);
-        localStorage.setItem('kkn_schedules_cached', JSON.stringify(list));
-        setSchedules(list);
-      }
-    }
-    
     // Trigger refreshing the schedules list from the database
     fetchSchedules();
 
