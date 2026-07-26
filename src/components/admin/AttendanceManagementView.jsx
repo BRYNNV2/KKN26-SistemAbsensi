@@ -918,6 +918,7 @@ export default function AttendanceManagementView({ user, onLogout, theme, onTogg
                       <div className="schedule-events-container">
                         {dayEvents.length > 0 ? (
                           dayEvents.map((evt) => {
+                            const isActive = checkIsActive(evt);
                             return (
                               <div 
                                 key={evt.id} 
